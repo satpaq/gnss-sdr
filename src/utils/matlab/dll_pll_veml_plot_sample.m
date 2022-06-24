@@ -21,16 +21,16 @@ if ~exist('dll_pll_veml_read_tracking_dump.m', 'file')
     addpath('./libs')
 end
 
-samplingFreq = 3000000;     %[Hz]
+samplingFreq = 4000000;     %[Hz]
 plot_last_outputs=0;%1000;
 
 channels = 1;   % Number of channels
 first_channel = 0;  % Number of the first channel
 
-path = '/home/javier/git/gnss-sdr/install/test_inta/';  %% CHANGE THIS PATH
+path = '/home/groundpaq/darren_space/gnss-sdr/install/test_inta/';
 
 for N=1:1:channels
-    tracking_log_path = [path 'tracking_ch_' num2str(N+first_channel-1) '.dat']; %% CHANGE track_ch_ BY YOUR dump_filename
+    tracking_log_path = [path 'tracking_ch_' num2str(N+first_channel-1) '.dat']; 
     GNSS_tracking(N) = dll_pll_veml_read_tracking_dump(tracking_log_path);
 end
 
@@ -71,6 +71,8 @@ for N=1:1:channels
     settings.numberOfChannels = channels;
     plotVEMLTracking(N, trackResults, settings)
 end
+
+print("done with file")
 
 %Doppler plot (optional)
 % for N=1:1:channels
