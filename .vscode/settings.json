@@ -1,0 +1,7 @@
+{
+    "cmake.configureOnOpen": false,
+    "python.defaultInterpreterPath": "~/.virtualenv/python-3LHSocPD/bin/python",
+    "python.terminal.integrated.env.linux": {
+        "DISPLAY" : "localhost:10.0",
+    }
+}

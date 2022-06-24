@@ -1,0 +1,28 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "tracking plot",
+            "type": "python",
+            "args": [
+                "-hr", "8", // sim length 
+            ],
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "program": "src/utils/python/plot_tracking.py",
+            "console": "integratedTerminal",
+            "redirectOutput": false,
+        },
+    ]
+}
