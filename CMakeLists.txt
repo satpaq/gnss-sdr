@@ -702,6 +702,10 @@ endif()
 if(UNIX AND EXISTS "/usr/lib64")
     list(APPEND BOOST_LIBRARYDIR "/usr/lib64") # Fedora 64-bit fix
 endif()
+
+# moffet 3 location of boost libs
+# link_directories(/home/blmckinley/install/lib/ ${Boost_LIBRARY_DIRS})  # include extra boost libs
+
 # Boost_ADDITIONAL_VERSIONS is only used internally by cmake to know the
 # formation of newer versions. No need to increase, not used anymore since newer
 # Boost provides its own CMake configuration files.

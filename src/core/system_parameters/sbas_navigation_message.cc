@@ -106,49 +106,14 @@ void Sbas_Navigation_Message::decode_page(const std::bitset<SBAS_DATA_PAGE_BITS>
     bool alert_flag;
 
     // common to all messages
-    const auto PRN = static_cast<int32_t>(read_navigation_unsigned(data_bits, CNAV_PRN));
-    ephemeris_record.PRN = PRN;
-
-    d_TOW = static_cast<int32_t>(read_navigation_unsigned(data_bits, CNAV_TOW));
-    d_TOW *= CNAV_TOW_LSB;
-    ephemeris_record.tow = d_TOW;
-
-    alert_flag = static_cast<bool>(read_navigation_bool(data_bits, CNAV_ALERT_FLAG));
-    ephemeris_record.alert_flag = alert_flag;
-
-    page_type = static_cast<int32_t>(read_navigation_unsigned(data_bits, CNAV_MSG_TYPE));
+    page_type = static_cast<int32_t>(read_navigation_unsigned(data_bits, SBAS_MSG_TYPE));
 
 
     switch (page_type)
         {
-        case 10:  // Ephemeris 1/2
+        case 1:  // Ephemeris 1/2
             ephemeris_record.WN = static_cast<int32_t>(read_navigation_unsigned(data_bits, CNAV_WN));
-            ephemeris_record.signal_health = static_cast<int32_t>(read_navigation_unsigned(data_bits, CNAV_HEALTH));
-            ephemeris_record.top = static_cast<int32_t>(read_navigation_unsigned(data_bits, CNAV_TOP1));
-            ephemeris_record.top *= CNAV_TOP1_LSB;
-            ephemeris_record.URA0 = static_cast<double>(read_navigation_signed(data_bits, CNAV_URA));
-            ephemeris_record.toe1 = static_cast<int32_t>(read_navigation_unsigned(data_bits, CNAV_TOE1));
-            ephemeris_record.toe1 *= CNAV_TOE1_LSB;
-            ephemeris_record.delta_A = static_cast<double>(read_navigation_signed(data_bits, CNAV_DELTA_A));
-            ephemeris_record.delta_A *= CNAV_DELTA_A_LSB;
-            ephemeris_record.Adot = static_cast<double>(read_navigation_signed(data_bits, CNAV_A_DOT));
-            ephemeris_record.Adot *= CNAV_A_DOT_LSB;
-            ephemeris_record.sqrtA = std::sqrt(CNAV_A_REF + ephemeris_record.delta_A);
-            ephemeris_record.delta_n = static_cast<double>(read_navigation_signed(data_bits, CNAV_DELTA_N0));
-            ephemeris_record.delta_n *= CNAV_DELTA_N0_LSB;
-            ephemeris_record.delta_ndot = static_cast<double>(read_navigation_signed(data_bits, CNAV_DELTA_N0_DOT));
-            ephemeris_record.delta_ndot *= CNAV_DELTA_N0_DOT_LSB;
-            ephemeris_record.M_0 = static_cast<double>(read_navigation_signed(data_bits, CNAV_M0));
-            ephemeris_record.M_0 *= CNAV_M0_LSB;
-            ephemeris_record.ecc = static_cast<double>(read_navigation_unsigned(data_bits, CNAV_E_ECCENTRICITY));
-            ephemeris_record.ecc *= CNAV_E_ECCENTRICITY_LSB;
-            ephemeris_record.omega = static_cast<double>(read_navigation_signed(data_bits, CNAV_OMEGA));
-            ephemeris_record.omega *= CNAV_OMEGA_LSB;
-
-            ephemeris_record.integrity_status_flag = static_cast<bool>(read_navigation_bool(data_bits, CNAV_INTEGRITY_FLAG));
-            ephemeris_record.l2c_phasing_flag = static_cast<bool>(read_navigation_bool(data_bits, CNAV_L2_PHASING_FLAG));
-
-            b_flag_ephemeris_1 = true;
+            
             break;
         case 11:  // Ephemeris 2/2
             ephemeris_record.toe2 = static_cast<int32_t>(read_navigation_unsigned(data_bits, CNAV_TOE2));

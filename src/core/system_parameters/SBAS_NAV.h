@@ -142,6 +142,23 @@ const std::vector<std::pair<int32_t, int32_t> > SBAS_ECOV_E23({{92, 10}});
 const std::vector<std::pair<int32_t, int32_t> > SBAS_ECOV_E24({{102, 10}});
 const std::vector<std::pair<int32_t, int32_t> > SBAS_ECOV_E34({{112, 10}});
 
+// type 32 (satellite clock, ephem corrections)
+// type 39 (Satellite clock, ephem corrections 1)
+const std::vector<std::pair<int32_t, int32_t> > SBAS_ECORR_SLOT_DELTA({{15, 6}});
+const std::vector<std::pair<int32_t, int32_t> > SBAS_ECORR_IODG({{21, 2}});
+const std::vector<std::pair<int32_t, int32_t> > SBAS_ECORR_CUC({{23, 19}});
+const std::vector<std::pair<int32_t, int32_t> > SBAS_ECORR_CUS({{42, 19}});
+const std::vector<std::pair<int32_t, int32_t> > SBAS_ECORR_IDOT({{61, 22}});
+const std::vector<std::pair<int32_t, int32_t> > SBAS_ECORR_omega({{83, 34}});
+const std::vector<std::pair<int32_t, int32_t> > SBAS_ECORR_OMEGA0({{127, 34}});
+const std::vector<std::pair<int32_t, int32_t> > SBAS_ECORR_M0({{161, 34}});
+const std::vector<std::pair<int32_t, int32_t> > SBAS_ECORR_AGF0({{195, 25}});
+const std::vector<std::pair<int32_t, int32_t> > SBAS_ECORR_AGF1({{220, 16}});
+
+
+// type 40 (satellite clock, ephem, corrections 2)
+// type 47 (SBAS Satellite Almanac)
+
 /** \} */
 /** \} */
 #endif  // SBAS_NAV_H

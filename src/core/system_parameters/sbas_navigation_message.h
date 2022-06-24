@@ -20,9 +20,9 @@
 
 
 #include "SBAS_NAV.h"
-// #include "gps_cnav_ephemeris.h"
-// #include "gps_cnav_iono.h"
-// #include "gps_cnav_utc_model.h"
+#include "gps_cnav_ephemeris.h"
+#include "gps_cnav_iono.h"
+#include "gps_cnav_utc_model.h"
 #include <bitset>
 #include <cstdint>
 #include <map>
