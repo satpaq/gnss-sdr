@@ -19,7 +19,6 @@ def load_dumpMat(fname: str) -> dict:
 
     return arrays
 
-log_path = '/home/groundpaq/darren_space/gnss-sdr/data'
 
 
 class GNSS_SDR():
@@ -38,13 +37,27 @@ class GNSS_SDR():
         self.chVec = np.arange(self.nChan)
 
     def plot_acq(self,):
+        # see https://gnss-sdr.org/docs/sp-blocks/acquisition/#plotting-results-with-matlaboctave
+
+
         acqArray = []
         for ch in self.chVec:
-            filename = self.log_path + '/tracking_ch_%d.mat' % ch
+            filename = self.log_path + '/acq_1c_dump_G_1C_ch_%d_1_sat_1.mat' % ch
             acqDict = load_dumpMat(filename)
+            acqArray.append(acqDict)
             
+    def plot_observables(self, ):
+
+        # see fields in https://gnss-sdr.org/docs/sp-blocks/observables/#binary-output
+        obsArray = []
+        for ch in self.chVec:
+            filename = self.log_path + '/observ_ch_%d.mat' % ch
+            obsDict = load_dumpMat(filename)
+            obsArray.append(obsDict)
 
     def plot_tracking(self):
+        # see field names in https://gnss-sdr.org/docs/sp-blocks/tracking/#plotting-results-with-matlaboctave
+        
         samplingFreq = 3e6  # Hz
                 
         ax = np.zeros_like(self.chVec)
@@ -52,7 +65,7 @@ class GNSS_SDR():
 
         trackArray = []
         for ch in self.chVec:
-            filename = log_path + '/tracking_ch_%d.mat' % ch
+            filename = self.log_path + '/tracking_ch_%d.mat' % ch
             trackDict = load_dumpMat(filename)
             trackArray.append(trackDict)
 
@@ -104,7 +117,9 @@ if __name__ == "__main__":
     parser.add_argument('-dt','--timestep', action='store', nargs=1, type=int,
                         default=312, help='the number of seconds between data')
 
-    a_gnss = GNSS_SDR(nChan=1, log_path='/home/groundpaq/darren_space/gnss-sdr/data')
+    l_path = '/home/groundpaq/darren_space/gnss-sdr/data'
+
+    a_gnss = GNSS_SDR(nChan=1, log_path=l_path)
 
     a_gnss.plot_tracking()
 
