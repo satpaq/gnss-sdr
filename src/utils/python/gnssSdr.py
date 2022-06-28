@@ -132,14 +132,16 @@ class GNSS_SDR():
         # doppler shift (Hz)
         carrier_dop = trackDict['carrier_doppler_hz'].T[0,sample_idx:]/1000
 
-        # NOT PRESENT
-        # # carreir error (filterred, raw) at output of PLL (Hz) 
-        # carrier_pll_filt_err = trackDict['carrier_error_filt_hz'].T[0,sample_idx:]
-        # carrier_pll_err = trackDict['carr_error_hz'].T[0,sample_idx:]
-        
+        # carreir error (filterred, raw) at output of PLL (Hz) 
+        carrier_pll_filt_err = trackDict['carr_error_filt_hz'].T[0,sample_idx:]
+        carrier_pll_err = trackDict['carr_error_hz'].T[0,sample_idx:]
+        pll = carrier_pll_filt_err
+        pll_raw = carrier_pll_err
         # code error (filtered, raw) at output of DLL (chips)
         code_error_filt_chips = trackDict['code_error_chips'].T[0,sample_idx:]
+        dll = code_error_filt_chips
         code_error_chips = trackDict['code_error_filt_chips'].T[0,sample_idx:]
+        dll_raw = code_error_chips
         # code frequency (chip/s)
         code_freq_chips = trackDict['code_freq_chips'].T[0,sample_idx:]
         # code frequency rate (chips/s/s)
@@ -153,13 +155,13 @@ class GNSS_SDR():
         data_I = trackDict['Prompt_I'].T[0,sample_idx:]
         data_Q = trackDict['Prompt_Q'].T[0,sample_idx:]
 
-        return _time_s, carrier_dop, data_I, data_Q, code_error_filt_chips, code_error_chips
+        return _time_s, carrier_dop, data_I, data_Q, dll, dll_raw, pll, pll_raw
 
     ## --- LOW LEVEL PLOTTING -----
     def trackPlots(self, ch):
         ''' run the tracking plots on a given channel  '''
         trackDict = self.trackArray[ch]
-        _time_s, carrier_dop, dataI, dataQ, dll, dll_raw = self.parseTrack(trackDict)
+        _time_s, carrier_dop, dataI, dataQ, dll, dll_raw, pll, pll_raw = self.parseTrack(trackDict)
         fig, ax = plt.subplots()
         ax.plot(_time_s, carrier_dop, label='Doppler kHz')
         ax.set_xlabel('Time (s)')
@@ -178,7 +180,15 @@ class GNSS_SDR():
         ax[0].set_ylabel('I Data')
         ax[1].set_title("Bits of Nav Message")
         
-        # empty 2, 3,
+        ax[2].plot(_time_s, pll_raw)
+        ax[2].set_xlabel('Time (s)')
+        ax[2].set_ylabel('Amplitude')
+        ax[2].set_title('Raw PLL Discrim')
+        
+        ax[3].plot(_time_s, pll)
+        ax[3].set_xlabel('Time (s)')
+        ax[3].set_ylabel('Amplitude')
+        ax[3].set_title('Filtered PLL Discrim')
         
         ax[4].plot(_time_s, dll_raw)
         ax[4].set_xlabel('Time (s)')
