@@ -1,7 +1,17 @@
+''' file to load in dump mat's from gnss-sdr trials 
+for output plotting on remote, we use jupyter notebook style cell blocks.  
+
+created: Darren Reis
+date: 6/26/22
+Higher Ground
+'''
+
+#%% 
 from random import sample
 import h5py
 import numpy as np
 import matplotlib.pyplot as plt
+#matplotlib inline
 import argparse
 import sys, os, shutil
 
@@ -100,8 +110,6 @@ class GNSS_SDR():
         surf = ax.plot_surface(f, tau, acq_grid)
         fig.colorbar(surf)
 
-        
-        
 
     def parseTrack(self, trackDict, ):
         ''' parse out the contents of the track .mat 
@@ -114,6 +122,7 @@ class GNSS_SDR():
         else:
             sample_idx = 0
 
+        
         # time since track start (s)
         _time_s = trackDict['PRN_start_sample_count'].T[0,sample_idx:]/self.samplingFreq
         # prn under test
@@ -123,6 +132,7 @@ class GNSS_SDR():
         # doppler shift (Hz)
         carrier_dop = trackDict['carrier_doppler_hz'].T[0,sample_idx:]/1000
 
+        # NOT PRESENT
         # # carreir error (filterred, raw) at output of PLL (Hz) 
         # carrier_pll_filt_err = trackDict['carrier_error_filt_hz'].T[0,sample_idx:]
         # carrier_pll_err = trackDict['carr_error_hz'].T[0,sample_idx:]
@@ -143,18 +153,44 @@ class GNSS_SDR():
         data_I = trackDict['Prompt_I'].T[0,sample_idx:]
         data_Q = trackDict['Prompt_Q'].T[0,sample_idx:]
 
-        return _time_s, carrier_dop,
+        return _time_s, carrier_dop, data_I, data_Q, code_error_filt_chips, code_error_chips
 
     ## --- LOW LEVEL PLOTTING -----
     def trackPlots(self, ch):
         ''' run the tracking plots on a given channel  '''
         trackDict = self.trackArray[ch]
-        _time_s, carrier_dop = self.parseTrack(trackDict)
+        _time_s, carrier_dop, dataI, dataQ, dll, dll_raw = self.parseTrack(trackDict)
         fig, ax = plt.subplots()
         ax.plot(_time_s, carrier_dop, label='Doppler kHz')
         ax.set_xlabel('Time (s)')
         ax.set_ylabel('Doppler Freq [kHz]')
         ax.set_title('Doppler Shift on Ch 0')
+        
+        fig2, ax = plt.subplots(3,2)
+        ax = ax.flat
+        ax[0].plot(dataI, dataQ, '.')
+        ax[0].set_xlabel('I Data')
+        ax[0].set_ylabel('Q Data')
+        ax[0].set_title("Discrete-Time Constellation Diagram")
+        
+        ax[1].plot(_time_s, dataI,)
+        ax[1].set_xlabel('Time (s)')
+        ax[0].set_ylabel('I Data')
+        ax[1].set_title("Bits of Nav Message")
+        
+        # empty 2, 3,
+        
+        ax[4].plot(_time_s, dll_raw)
+        ax[4].set_xlabel('Time (s)')
+        ax[4].set_ylabel('Amplitude')
+        ax[4].set_title('Raw DLL Discrim')
+        
+        ax[5].plot(_time_s, dll)
+        ax[5].set_xlabel('Time (s)')
+        ax[5].set_ylabel('Amplitude')
+        ax[5].set_title('Filtered DLL Discrim')
+        
+        
     
     def acqPlots(self, ch):
         ''' run the acquisition plots on a given channel '''
@@ -185,7 +221,7 @@ class GNSS_SDR():
                 self.trackPlots(chIdx)
 
     
-
+#%%
 if __name__ == "__main__":
     
     print("plot_tracking.py startup\n")
@@ -205,8 +241,10 @@ if __name__ == "__main__":
 
 
     # actions
-    # a_gnss.plot_tracking()
-    a_gnss.plot_acq()
+    # %%
+    a_gnss.plot_tracking()
+    # a_gnss.plot_acq()
 
     plt.show()
     print("plot_tracking.py end\n")
+# %%
