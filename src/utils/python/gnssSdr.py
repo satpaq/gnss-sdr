@@ -39,26 +39,20 @@ class GNSS_SDR():
         self.samplingFreq = 3e6 # Hz
 
 
-        # startup action
+        # init actions
+        self.handle_acquire()
         self.handle_tracking()
+        self.handle_obs()
 
-
-    def plot_acq(self,):
-        # see https://gnss-sdr.org/docs/sp-blocks/acquisition/#plotting-results-with-matlaboctave
-        acqArray = []
-        for ch in self.chVec:
-            filename = self.log_path + '/acq_1c_dump_G_1C_ch_%d_1_sat_1.mat' % ch
-            acqDict = load_dumpMat(filename)
-            acqArray.append(acqDict)
-            
-    def plot_observables(self, ):
-
+    ## ----- LOADERS ------
+    def handle_obs(self,):
         # see fields in https://gnss-sdr.org/docs/sp-blocks/observables/#binary-output
         obsArray = []
         for ch in self.chVec:
-            filename = self.log_path + '/observ_ch_%d.mat' % ch
+            filename = self.log_path + '/observ_ch_.mat'
             obsDict = load_dumpMat(filename)
             obsArray.append(obsDict)
+        self.obsArray = obsArray
 
     def handle_tracking(self,):
         trackArray = []
@@ -66,27 +60,59 @@ class GNSS_SDR():
             filename = self.log_path + '/tracking_ch_%d.mat' % ch
             trackDict = load_dumpMat(filename)
             trackArray.append(trackDict)
-
         self.trackArray = trackArray
 
-    def plot_tracking(self):
-        # see field names in https://gnss-sdr.org/docs/sp-blocks/tracking/#plotting-results-with-matlaboctave
+    def handle_acquire(self,):
+        acqArray = []
+        for ch in self.chVec:
+            filename = self.log_path + '/acq_1c_dump_G_1C_ch_%d_1_sat_1.mat' % ch
+            acqDict = load_dumpMat(filename)
+            acqArray.append(acqDict)
+        self.acqArray = acqArray
+
+    ### ---- DICT PARSERS -------
+    def parseAcq(self, acqDict):
+        ''' parse out the elements of the acquisition .mat 
+        TBD what returns, for now return _time_s, acq_doppler
+        '''
         
-        if self.nChan == 1:
-            self.trackPlots(self.trackArray[0])
-        else:
-            for chIdx, ch in enumerate(self.chVec):
-                self.trackPlots(self.trackArray[chIdx])
+        _time_sample = acqDict['sample_counter'][0]
+        prn = acqDict['PRN'][0]
+        in_power = acqDict['input_power'][0]  # ??
+
+        # overall params
+        nDwell = acqDict['num_dwells'][0]
+        dopplerStep = acqDict['doppler_step'][0]
+        dopplerMax = acqDict['doppler_max'][0]
+        thresh = acqDict['threshold'][0]
+        isDetected = acqDict['d_positive_acq'][0]
+        # course estimate of doppler shift (Hz)
+        acq_doppler = acqDict['acq_doppler_hz'][0]
+        # course estimate of time delay (samp)
+        acq_delay = acqDict['acq_delay_samples'][0]
+
+        # 2d array results for acquisition 
+        acq_grid = acqDict['acq_grid']
+        f = np.arange(-dopplerMax, dopplerMax, dopplerStep)
+        tau = np.linspace(0, 1023, np.size(acq_grid,1))
+        
+        fig, ax = plt.subplots()
+        surf = ax.plot_surface(f, tau, acq_grid)
+        fig.colorbar(surf)
+
+        
+        
 
     def parseTrack(self, trackDict, ):
-        ''' parse out the contents of the track .mat '''
-
+        ''' parse out the contents of the track .mat 
+        TBD what fields you want returned, for now just _time_s, carrier_dop
+        '''
         sample_idx = 0
         code_freq_chips = trackDict['code_freq_chips']
         if sample_idx > 0 and sample_idx<len(code_freq_chips):
             sample_idx = len(code_freq_chips) - sample_idx
         else:
-            sample_idx = 1
+            sample_idx = 0
 
         # time since track start (s)
         _time_s = trackDict['PRN_start_sample_count'].T[0,sample_idx:]/self.samplingFreq
@@ -96,7 +122,7 @@ class GNSS_SDR():
         carrier_lock = trackDict['carrier_lock_test'].T[0,sample_idx:]
         # doppler shift (Hz)
         carrier_dop = trackDict['carrier_doppler_hz'].T[0,sample_idx:]/1000
-        
+
         # # carreir error (filterred, raw) at output of PLL (Hz) 
         # carrier_pll_filt_err = trackDict['carrier_error_filt_hz'].T[0,sample_idx:]
         # carrier_pll_err = trackDict['carr_error_hz'].T[0,sample_idx:]
@@ -119,16 +145,46 @@ class GNSS_SDR():
 
         return _time_s, carrier_dop,
 
-
-    def trackPlots(self, trackDict):
+    ## --- LOW LEVEL PLOTTING -----
+    def trackPlots(self, ch):
         ''' run the tracking plots on a given channel  '''
+        trackDict = self.trackArray[ch]
         _time_s, carrier_dop = self.parseTrack(trackDict)
         fig, ax = plt.subplots()
         ax.plot(_time_s, carrier_dop, label='Doppler kHz')
         ax.set_xlabel('Time (s)')
         ax.set_ylabel('Doppler Freq [kHz]')
         ax.set_title('Doppler Shift on Ch 0')
+    
+    def acqPlots(self, ch):
+        ''' run the acquisition plots on a given channel '''
+        acqDict = self.acqArray[ch]
+        self.parseAcq(acqDict)
+
+
+    # HIGH LEVEL ACTIONS
+    def plot_acq(self,):
+        # see https://gnss-sdr.org/docs/sp-blocks/acquisition/#plotting-results-with-matlaboctave
+        if self.nChan == 1:
+            self.acqPlots(0)
+        else:
+            for chIdx, ch in enumerate(self.chVec):
+                self.acqPlots(chIdx)
+            
+    def plot_observables(self, ):
+        pass
+    
+
+    def plot_tracking(self):
+        # see field names in https://gnss-sdr.org/docs/sp-blocks/tracking/#plotting-results-with-matlaboctave
         
+        if self.nChan == 1:
+            self.trackPlots(0)
+        else:
+            for chIdx, ch in enumerate(self.chVec):
+                self.trackPlots(chIdx)
+
+    
 
 if __name__ == "__main__":
     
@@ -149,7 +205,8 @@ if __name__ == "__main__":
 
 
     # actions
-    a_gnss.plot_tracking()
+    # a_gnss.plot_tracking()
+    a_gnss.plot_acq()
 
     plt.show()
     print("plot_tracking.py end\n")
