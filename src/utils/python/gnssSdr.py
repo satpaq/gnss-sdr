@@ -34,17 +34,17 @@ def load_dumpMat(fname: str) -> dict:
 class GNSS_SDR():
     ''' class for gathering data from running GNSS-SDR '''
 
-    def __init__(self, nChan, log_path):
+    def __init__(self, nTrack, log_path):
         ''' Constructor
         
-        @param nChan [int]: number of channels to look at
+        @param nTrack [int]: number of tracking channels to look at
         @param log_path [str]: the dir where the data is kept
 
         '''
-        self.nChan = nChan
+        self.nTrack = nTrack
         self.log_path = log_path
 
-        self.chVec = np.arange(self.nChan)
+        self.chVec = np.arange(self.nTrack)
         
         self.samplingFreq = 3e6 # Hz
 
@@ -52,7 +52,7 @@ class GNSS_SDR():
         # init actions
         self.handle_acquire()
         self.handle_tracking()
-        self.handle_obs()
+        # self.handle_obs()
 
     ## ----- LOADERS ------
     def handle_obs(self,):
@@ -71,13 +71,37 @@ class GNSS_SDR():
             trackDict = load_dumpMat(filename)
             trackArray.append(trackDict)
         self.trackArray = trackArray
+        
+    def handle_telem(self,):
+        telemArray = []
+        for ch in self.chVec:
+            filename = self.log_path + '/nav_data%d.mat' % ch
+            telemDict = load_dumpMat(filename)
+            telemArray.append(telemDict)
+        self.telemArray = telemArray
 
     def handle_acquire(self,):
         acqArray = []
+        
+        # dir_files = os.listdir(self.log_path)
+        # for file in dir_files:
+        #     if(file.startswith('acq')):
+        #         acqDict = load_dumpMat(file)
+        #         # only load in positive acquired .mat dumps
+        #         if acqDict['d_positive_acq'][0]==1:
+        #             acqArray.append(acqDict)
+        #         # could alternatively load in only those with PRN == P
+                    
         for ch in self.chVec:
-            filename = self.log_path + '/acq_1c_dump_G_1C_ch_%d_1_sat_1.mat' % ch
+            # naming convention set in https://github.com/gnss-sdr/gnss-sdr/blob/main/src/algorithms/acquisition/gnuradio_blocks/pcps_acquisition.cc#L394
+            # naming as "acq_dump_G_1C_ch_N_K_sat_P"   
+            #   N is channel dump num from config
+            #   K is dump number (increments)
+            #   P is target PRN
+            filename = self.log_path + '/acq_dump_G_1C_ch_%d_1_sat_1.mat' % ch
             acqDict = load_dumpMat(filename)
             acqArray.append(acqDict)
+            
         self.acqArray = acqArray
 
     ### ---- DICT PARSERS -------
@@ -102,14 +126,21 @@ class GNSS_SDR():
         acq_delay = acqDict['acq_delay_samples'][0]
 
         # 2d array results for acquisition 
-        acq_grid = acqDict['acq_grid']
-        f = np.arange(-dopplerMax, dopplerMax, dopplerStep)
-        tau = np.linspace(0, 1023, np.size(acq_grid,1))
+        # acq_grid = acqDict['acq_grid']
+        # f = np.arange(-dopplerMax, dopplerMax, dopplerStep)
+        # tau = np.linspace(0, 1023, np.size(acq_grid,1))
         
-        fig, ax = plt.subplots()
-        surf = ax.plot_surface(f, tau, acq_grid)
-        fig.colorbar(surf)
+        # fig, ax = plt.subplots()
+        # surf = ax.plot_surface(f, tau, acq_grid)
+        # fig.colorbar(surf)
 
+    def parseTelem(self, telemDict):
+        ''' parse out the elements of the nav_data .mat 
+        TBD what returns, 
+        '''
+        
+        _time_sample = np.uint64(telemDict['tracking_sample_counter'][0])
+        prn = np.uin32(telemDict['PRN'][0])
 
     def parseTrack(self, trackDict, ):
         ''' parse out the contents of the track .mat 
@@ -211,7 +242,7 @@ class GNSS_SDR():
     # HIGH LEVEL ACTIONS
     def plot_acq(self,):
         # see https://gnss-sdr.org/docs/sp-blocks/acquisition/#plotting-results-with-matlaboctave
-        if self.nChan == 1:
+        if self.nTrack == 1:
             self.acqPlots(0)
         else:
             for chIdx, ch in enumerate(self.chVec):
@@ -224,37 +255,42 @@ class GNSS_SDR():
     def plot_tracking(self):
         # see field names in https://gnss-sdr.org/docs/sp-blocks/tracking/#plotting-results-with-matlaboctave
         
-        if self.nChan == 1:
+        if self.nTrack == 1:
             self.trackPlots(0)
         else:
             for chIdx, ch in enumerate(self.chVec):
                 self.trackPlots(chIdx)
 
     
-#%%
-if __name__ == "__main__":
+
+# if __name__ == "__main__":
     
-    print("plot_tracking.py startup\n")
+#     print("gnssSdr.py startup\n")
 
-    ## -- PARSER ----
-    parser = argparse.ArgumentParser(description=''' 
-    This script is a class for doing gnss-sdr work ''')
+#     ## -- PARSER ----
+#     parser = argparse.ArgumentParser(description=''' 
+#     This script is a class for doing gnss-sdr work ''')
     
-    # setup params
-    parser.add_argument('-dt','--timestep', action='store', nargs=1, type=int,
-                        default=312, help='the number of seconds between data')
+#     # setup params
+#     parser.add_argument('-dt','--timestep', action='store', nargs=1, type=int,
+#                         default=312, help='the number of seconds between data')
 
-    l_path = '/home/groundpaq/darren_space/gnss-sdr/data'
+l_path = '/home/groundpaq/darren_space/gnss-sdr/data'
 
-    # init
-    a_gnss = GNSS_SDR(nChan=1, log_path=l_path)
+# init
+dar_gnss = GNSS_SDR(nChan=1, log_path=l_path+'/darren')
+sp_gnss = GNSS_SDR(nChan=1, log_path=l_path+'/spain')
 
-
-    # actions
-    # %%
-    a_gnss.plot_tracking()
-    # a_gnss.plot_acq()
-
-    plt.show()
-    print("plot_tracking.py end\n")
+# actions
 # %%
+sp_gnss.plot_acq()
+# sp_gnss.plot_tracking()
+
+# %% 
+# dar_gnss.plot_acq()
+# dar_gnss.plot_tracking()
+
+# %%
+plt.show()
+print("gnssSdr.py end\n")
+
