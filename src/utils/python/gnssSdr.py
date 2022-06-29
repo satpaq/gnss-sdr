@@ -35,7 +35,7 @@ def load_dumpMat(fname: str) -> dict:
 class GNSS_SDR():
     ''' class for gathering data from running GNSS-SDR '''
 
-    def __init__(self, name, log_path, nTrack=1, ):
+    def __init__(self, name, log_path, nTrack=None, ):
         ''' Constructor
         @param name [str]: name of this collection
         @param nTrack [int]: number of tracking channels to look at
@@ -45,10 +45,11 @@ class GNSS_SDR():
         self.nTrack = nTrack
         self.log_path = log_path
         self.name = name
-        self.chVec = np.arange(self.nTrack)
+        self.tVec = np.arange(self.nTrack)
         
         self.samplingFreq = 3e6 # Hz
 
+        self.dir_files = os.listdir(self.log_path)
 
         # init actions
         self.handle_acquire()
@@ -58,34 +59,39 @@ class GNSS_SDR():
     ## ----- LOADERS ------
     def handle_obs(self,):
         # see fields in https://gnss-sdr.org/docs/sp-blocks/observables/#binary-output
-        obsArray = []
-        for ch in self.chVec:
-            filename = self.log_path + '/observ_ch_.mat'
-            obsDict = load_dumpMat(filename)
-            obsArray.append(obsDict)
-        self.obsArray = obsArray
+        filename = self.log_path + '/observables.mat'
+        obsDict = load_dumpMat(filename)
+        self.obsArray = obsDict
 
     def handle_tracking(self,):
         trackArray = []
-        for ch in self.chVec:
-            filename = self.log_path + '/tracking_ch_%d.mat' % ch
-            trackDict = load_dumpMat(filename)
-            trackArray.append(trackDict)
+        for file in self.dir_files:
+            if(file.startswith('nav_') and file.endswith('.mat')):
+                filename = os.path.join(self.log_path, file)
+                trackDict = load_dumpMat(filename)
+                trackArray.append(trackDict)
         self.trackArray = trackArray
+        if self.nTrack == None:
+            # save away the found tracks
+            self.nTrack = len(self.trackArray)
+        else:
+            self.nTrack = 1
         
     def handle_telem(self,):
         telemArray = []
-        for ch in self.chVec:
-            filename = self.log_path + '/nav_data%d.mat' % ch
-            telemDict = load_dumpMat(filename)
-            telemArray.append(telemDict)
+        
+        for file in self.dir_files:
+            if(file.startswith('nav_')):
+                filename = os.path.join(self.log_path, file)
+                telemDict = load_dumpMat(filename)
+                telemArray.append(telemDict)
+                
         self.telemArray = telemArray
 
     def handle_acquire(self,):
         acqArray = []
         
-        dir_files = os.listdir(self.log_path)
-        for file in dir_files:
+        for file in self.dir_files:
             if(file.startswith('acq')):
                 acqDict = load_dumpMat(os.path.join(self.log_path, file))
                 # only load in positive acquired .mat dumps
@@ -122,7 +128,8 @@ class GNSS_SDR():
         acq_doppler = acqDict['acq_doppler_hz'][0]
         # course estimate of time delay (samp)
         acq_delay = acqDict['acq_delay_samples'][0]
-
+        # result of test statistic
+        test_stat = acqDict['test_statistic'][0]
         # 2d array results for acquisition 
         acq_grid = acqDict['acq_grid']
         f = np.arange(-dopplerMax, dopplerMax, dopplerStep)
@@ -135,6 +142,9 @@ class GNSS_SDR():
         ax.set_xlabel('Frequencies (Hz)')
         ax.set_ylabel('Delay (chips)')
         fig.colorbar(surf)
+        
+        self.printer("PRN %d Acquire Test Statistic: %.2f" % (prn, test_stat))
+        
 
     def parseTelem(self, telemDict):
         ''' parse out the elements of the nav_data .mat 
@@ -199,7 +209,7 @@ class GNSS_SDR():
         ax.plot(_time_s, carrier_dop, label='Doppler kHz')
         ax.set_xlabel('Time (s)')
         ax.set_ylabel('Doppler Freq [kHz]')
-        ax.set_title('Doppler Shift on Ch 0')
+        ax.set_title('Doppler Shift on Track 0')
         
         fig2, ax = plt.subplots(3,2)
         ax = ax.flat
@@ -260,8 +270,8 @@ class GNSS_SDR():
         if self.nTrack == 1:
             self.trackPlots(0)
         else:
-            for chIdx, ch in enumerate(self.chVec):
-                self.trackPlots(chIdx)
+            for tIdx, trackDict in enumerate(self.trackArray):
+                self.trackPlots(tIdx)
 
     ## ----------- UTILITIES ------------- ##
     def printer(self, strg):
@@ -284,17 +294,17 @@ class GNSS_SDR():
 l_path = '/home/groundpaq/darren_space/gnss-sdr/data'
 
 # init
-# dar_gnss = GNSS_SDR(name='dar', nTrack=1, log_path=l_path+'/darren')
+dar_gnss = GNSS_SDR(name='dar', nTrack=1, log_path=l_path+'/darren')
 sp_gnss = GNSS_SDR(name='spain', nTrack=1, log_path=l_path+'/spain')
 
 # actions
 # %%
 sp_gnss.plot_acq()
-# sp_gnss.plot_tracking()
+sp_gnss.plot_tracking()
 
 # %% 
-# dar_gnss.plot_acq()
-# dar_gnss.plot_tracking()
+dar_gnss.plot_acq()
+dar_gnss.plot_tracking()
 
 # %%
 plt.show()
