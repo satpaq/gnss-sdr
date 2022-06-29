@@ -60,13 +60,13 @@ class GNSS_SDR():
     def handle_obs(self,):
         # see fields in https://gnss-sdr.org/docs/sp-blocks/observables/#binary-output
         filename = self.log_path + '/observables.mat'
-        obsDict = load_dumpMat(filename)
-        self.obsArray = obsDict
+        self.obsDict = load_dumpMat(filename)
+        
 
     def handle_tracking(self,):
         trackArray = []
         for file in self.dir_files:
-            if(file.startswith('nav_') and file.endswith('.mat')):
+            if(file.startswith('tracking_') and file.endswith('.mat')):
                 filename = os.path.join(self.log_path, file)
                 trackDict = load_dumpMat(filename)
                 trackArray.append(trackDict)
@@ -78,21 +78,21 @@ class GNSS_SDR():
             self.nTrack = 1
         
     def handle_telem(self,):
-        telemArray = []
+        navArray = []
         
         for file in self.dir_files:
-            if(file.startswith('nav_')):
+            if(file.startswith('nav_') and file.endswith('.mat')):
                 filename = os.path.join(self.log_path, file)
-                telemDict = load_dumpMat(filename)
-                telemArray.append(telemDict)
+                navDict = load_dumpMat(filename)
+                navArray.append(navDict)
                 
-        self.telemArray = telemArray
+        self.navArray = navArray
 
     def handle_acquire(self,):
         acqArray = []
         
         for file in self.dir_files:
-            if(file.startswith('acq')):
+            if(file.startswith('acq') and file.endswith('.mat')):
                 acqDict = load_dumpMat(os.path.join(self.log_path, file))
                 # only load in positive acquired .mat dumps
                 if acqDict['d_positive_acq'][0]==1:
@@ -146,15 +146,19 @@ class GNSS_SDR():
         self.printer("PRN %d Acquire Test Statistic: %.2f" % (prn, test_stat))
         
 
-    def parseTelem(self, telemDict):
-        ''' parse out the elements of the nav_data .mat 
-        TBD what returns, 
-        '''
+    def parseNav(self, navDict):
+        ''' parse out the elements of a specified nav_data .mat: a 1d with len = number of epochs
+            (tracking integration times)
         
-        _time_sample = np.uint64(telemDict['tracking_sample_counter'][0])
-        prn = np.uin32(telemDict['PRN'][0])
-
-    def parseTrack(self, trackDict, ):
+        '''
+        _time_sample = np.uint64(navDict['tracking_sample_counter'][0])
+        prn = np.uin32(navDict['PRN'][0])
+        TOW_cur_sym_ms = np.double(navDict['TOW_at_current_symbol_ms'][0])
+        TOW_preamble_ms = np.double(navDict['TOW_at_Preamble_ms'][0])
+        nav_data = [np.int32(x) for x in navDict['nav_symbol'][0]]
+        self.printer("done parseNav")
+        
+    def parseTrack(self, trackDict, do_plot=True):
         ''' parse out the contents of the track .mat 
         TBD what fields you want returned, for now just _time_s, carrier_dop
         '''
@@ -165,7 +169,6 @@ class GNSS_SDR():
         else:
             sample_idx = 0
 
-        
         # time since track start (s)
         _time_s = trackDict['PRN_start_sample_count'].T[0,sample_idx:]/self.samplingFreq
         # prn under test
@@ -198,80 +201,82 @@ class GNSS_SDR():
         data_I = trackDict['Prompt_I'].T[0,sample_idx:]
         data_Q = trackDict['Prompt_Q'].T[0,sample_idx:]
 
+        if do_plot:
+            fig, ax = plt.subplots()
+            ax.plot(_time_s, carrier_dop, label='Doppler kHz')
+            ax.set_xlabel('Time (s)')
+            ax.set_ylabel('Doppler Freq [kHz]')
+            ax.set_title('Doppler Shift on Track 0')
+            
+            fig2, ax = plt.subplots(3,2)
+            ax = ax.flat
+            ax[0].plot(data_I, data_Q, '.')
+            ax[0].set_xlabel('I Data')
+            ax[0].set_ylabel('Q Data')
+            ax[0].set_title("Discrete-Time Constellation Diagram")
+            
+            ax[1].plot(_time_s, data_I,)
+            ax[1].set_xlabel('Time (s)')
+            ax[0].set_ylabel('I Data')
+            ax[1].set_title("Bits of Nav Message")
+            
+            ax[2].plot(_time_s, pll_raw)
+            ax[2].set_xlabel('Time (s)')
+            ax[2].set_ylabel('Amplitude')
+            ax[2].set_title('Raw PLL Discrim')
+            
+            ax[3].plot(_time_s, pll)
+            ax[3].set_xlabel('Time (s)')
+            ax[3].set_ylabel('Amplitude')
+            ax[3].set_title('Filtered PLL Discrim')
+            
+            ax[4].plot(_time_s, dll_raw)
+            ax[4].set_xlabel('Time (s)')
+            ax[4].set_ylabel('Amplitude')
+            ax[4].set_title('Raw DLL Discrim')
+            
+            ax[5].plot(_time_s, dll)
+            ax[5].set_xlabel('Time (s)')
+            ax[5].set_ylabel('Amplitude')
+            ax[5].set_title('Filtered DLL Discrim')
+
         return _time_s, carrier_dop, data_I, data_Q, dll, dll_raw, pll, pll_raw
 
-    ## --- LOW LEVEL PLOTTING -----
-    def trackPlots(self, ch):
-        ''' run the tracking plots on a given channel  '''
-        trackDict = self.trackArray[ch]
-        _time_s, carrier_dop, dataI, dataQ, dll, dll_raw, pll, pll_raw = self.parseTrack(trackDict)
-        fig, ax = plt.subplots()
-        ax.plot(_time_s, carrier_dop, label='Doppler kHz')
-        ax.set_xlabel('Time (s)')
-        ax.set_ylabel('Doppler Freq [kHz]')
-        ax.set_title('Doppler Shift on Track 0')
-        
-        fig2, ax = plt.subplots(3,2)
-        ax = ax.flat
-        ax[0].plot(dataI, dataQ, '.')
-        ax[0].set_xlabel('I Data')
-        ax[0].set_ylabel('Q Data')
-        ax[0].set_title("Discrete-Time Constellation Diagram")
-        
-        ax[1].plot(_time_s, dataI,)
-        ax[1].set_xlabel('Time (s)')
-        ax[0].set_ylabel('I Data')
-        ax[1].set_title("Bits of Nav Message")
-        
-        ax[2].plot(_time_s, pll_raw)
-        ax[2].set_xlabel('Time (s)')
-        ax[2].set_ylabel('Amplitude')
-        ax[2].set_title('Raw PLL Discrim')
-        
-        ax[3].plot(_time_s, pll)
-        ax[3].set_xlabel('Time (s)')
-        ax[3].set_ylabel('Amplitude')
-        ax[3].set_title('Filtered PLL Discrim')
-        
-        ax[4].plot(_time_s, dll_raw)
-        ax[4].set_xlabel('Time (s)')
-        ax[4].set_ylabel('Amplitude')
-        ax[4].set_title('Raw DLL Discrim')
-        
-        ax[5].plot(_time_s, dll)
-        ax[5].set_xlabel('Time (s)')
-        ax[5].set_ylabel('Amplitude')
-        ax[5].set_title('Filtered DLL Discrim')
+    def parseObserve(self,):
+        # rows = num Chan, columns = num of epochs
+        carrier_doppler_hz = self.obsDict['Carrier_Doppler_hz']
+        carrier_phase_cyc = self.obsDict['Carrier_phase_cycles']
+        valid_pseudorange = self.obsDict['Flag_valid_pseudorange']
+        prn_vec = self.obsDict['PRN']  # vec of headers for sat id 
+        psuedorange_m = self.obsDict['Pseudorange_m']
+        TOW_curr_sym_s = self.obsDict['TOW_at_current_symbol_s']
+        print("done parse Observe")
         
         
-    
-    def acqPlots(self, ch):
-        ''' run the acquisition plots on a given channel '''
-        acqDict = self.acqArray[ch]
-        self.parseAcq(acqDict)
-
-
     # HIGH LEVEL ACTIONS
     def plot_acq(self,):
         # see https://gnss-sdr.org/docs/sp-blocks/acquisition/#plotting-results-with-matlaboctave
         if self.nAcquire>0:
             # plot the first acquired signal
-            self.acqPlots(0)
+            self.parseAcq(self.acqArray[0])
         else:
             self.printer("No Positive Acquires")
             
     def plot_observables(self, ):
-        pass
+        self.parseObserve()
     
+    def plot_nav(self,):
+        for nIdx, navDict in enumerate(self.navArray):
+            self.parseNav(navDict)
 
     def plot_tracking(self):
         # see field names in https://gnss-sdr.org/docs/sp-blocks/tracking/#plotting-results-with-matlaboctave
         
         if self.nTrack == 1:
-            self.trackPlots(0)
+            self.parseTrack(self.trackArray[0],do_plot=True)
         else:
             for tIdx, trackDict in enumerate(self.trackArray):
-                self.trackPlots(tIdx)
+                self.parseTrack(trackDict,do_plot=True)
 
     ## ----------- UTILITIES ------------- ##
     def printer(self, strg):
@@ -294,17 +299,18 @@ class GNSS_SDR():
 l_path = '/home/groundpaq/darren_space/gnss-sdr/data'
 
 # init
-dar_gnss = GNSS_SDR(name='dar', nTrack=1, log_path=l_path+'/darren')
+# dar_gnss = GNSS_SDR(name='dar', nTrack=1, log_path=l_path+'/darren')
 sp_gnss = GNSS_SDR(name='spain', nTrack=1, log_path=l_path+'/spain')
 
 # actions
 # %%
 sp_gnss.plot_acq()
 sp_gnss.plot_tracking()
+sp_gnss.plot_observables()
 
 # %% 
-dar_gnss.plot_acq()
-dar_gnss.plot_tracking()
+# dar_gnss.plot_acq()
+# dar_gnss.plot_tracking()
 
 # %%
 plt.show()
