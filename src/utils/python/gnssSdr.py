@@ -11,6 +11,7 @@ from random import sample
 import h5py
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 #matplotlib inline
 import argparse
 import sys, os, shutil
@@ -34,16 +35,16 @@ def load_dumpMat(fname: str) -> dict:
 class GNSS_SDR():
     ''' class for gathering data from running GNSS-SDR '''
 
-    def __init__(self, nTrack, log_path):
+    def __init__(self, name, log_path, nTrack=1, ):
         ''' Constructor
-        
+        @param name [str]: name of this collection
         @param nTrack [int]: number of tracking channels to look at
         @param log_path [str]: the dir where the data is kept
 
         '''
         self.nTrack = nTrack
         self.log_path = log_path
-
+        self.name = name
         self.chVec = np.arange(self.nTrack)
         
         self.samplingFreq = 3e6 # Hz
@@ -83,26 +84,23 @@ class GNSS_SDR():
     def handle_acquire(self,):
         acqArray = []
         
-        # dir_files = os.listdir(self.log_path)
-        # for file in dir_files:
-        #     if(file.startswith('acq')):
-        #         acqDict = load_dumpMat(file)
-        #         # only load in positive acquired .mat dumps
-        #         if acqDict['d_positive_acq'][0]==1:
-        #             acqArray.append(acqDict)
-        #         # could alternatively load in only those with PRN == P
-                    
-        for ch in self.chVec:
+        dir_files = os.listdir(self.log_path)
+        for file in dir_files:
+            if(file.startswith('acq')):
+                acqDict = load_dumpMat(os.path.join(self.log_path, file))
+                # only load in positive acquired .mat dumps
+                if acqDict['d_positive_acq'][0]==1:
+                    acqArray.append(acqDict)
+                # could alternatively load in only those with PRN == P
+            
             # naming convention set in https://github.com/gnss-sdr/gnss-sdr/blob/main/src/algorithms/acquisition/gnuradio_blocks/pcps_acquisition.cc#L394
             # naming as "acq_dump_G_1C_ch_N_K_sat_P"   
             #   N is channel dump num from config
             #   K is dump number (increments)
             #   P is target PRN
-            filename = self.log_path + '/acq_dump_G_1C_ch_%d_1_sat_1.mat' % ch
-            acqDict = load_dumpMat(filename)
-            acqArray.append(acqDict)
             
         self.acqArray = acqArray
+        self.nAcquire = len(self.acqArray)
 
     ### ---- DICT PARSERS -------
     def parseAcq(self, acqDict):
@@ -126,13 +124,17 @@ class GNSS_SDR():
         acq_delay = acqDict['acq_delay_samples'][0]
 
         # 2d array results for acquisition 
-        # acq_grid = acqDict['acq_grid']
-        # f = np.arange(-dopplerMax, dopplerMax, dopplerStep)
-        # tau = np.linspace(0, 1023, np.size(acq_grid,1))
-        
-        # fig, ax = plt.subplots()
-        # surf = ax.plot_surface(f, tau, acq_grid)
-        # fig.colorbar(surf)
+        acq_grid = acqDict['acq_grid']
+        f = np.arange(-dopplerMax, dopplerMax, dopplerStep)
+        tau = np.linspace(0, 1023, np.size(acq_grid,1))
+        F, T = np.meshgrid(f, tau)
+        A = np.reshape(acq_grid, F.shape)
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        surf = ax.plot_surface(F,T, A)
+        ax.set_xlabel('Frequencies (Hz)')
+        ax.set_ylabel('Delay (chips)')
+        fig.colorbar(surf)
 
     def parseTelem(self, telemDict):
         ''' parse out the elements of the nav_data .mat 
@@ -242,11 +244,11 @@ class GNSS_SDR():
     # HIGH LEVEL ACTIONS
     def plot_acq(self,):
         # see https://gnss-sdr.org/docs/sp-blocks/acquisition/#plotting-results-with-matlaboctave
-        if self.nTrack == 1:
+        if self.nAcquire>0:
+            # plot the first acquired signal
             self.acqPlots(0)
         else:
-            for chIdx, ch in enumerate(self.chVec):
-                self.acqPlots(chIdx)
+            self.printer("No Positive Acquires")
             
     def plot_observables(self, ):
         pass
@@ -261,6 +263,10 @@ class GNSS_SDR():
             for chIdx, ch in enumerate(self.chVec):
                 self.trackPlots(chIdx)
 
+    ## ----------- UTILITIES ------------- ##
+    def printer(self, strg):
+        print("GNSS_SDR:: %s" %strg)
+        
     
 
 # if __name__ == "__main__":
@@ -278,8 +284,8 @@ class GNSS_SDR():
 l_path = '/home/groundpaq/darren_space/gnss-sdr/data'
 
 # init
-dar_gnss = GNSS_SDR(nChan=1, log_path=l_path+'/darren')
-sp_gnss = GNSS_SDR(nChan=1, log_path=l_path+'/spain')
+# dar_gnss = GNSS_SDR(name='dar', nTrack=1, log_path=l_path+'/darren')
+sp_gnss = GNSS_SDR(name='spain', nTrack=1, log_path=l_path+'/spain')
 
 # actions
 # %%
