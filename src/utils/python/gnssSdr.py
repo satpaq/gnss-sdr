@@ -165,7 +165,12 @@ class GNSS_SDR():
             self.printer("No tracks to search")
         else:
             for trackDict in self.trackArray:
-                this_prn = trackDict['PRN'][0][0]
+                dictDim =  np.ndim(trackDict['PRN'])
+                if dictDim == 1:
+                    this_prn = trackDict['PRN'][0]
+                elif dictDim == 2:
+                    this_prn = trackDict['PRN'][0][0]
+                
                 if this_prn==prn:
                     self.parseTrack(trackDict,do_plot)
                     break
@@ -319,18 +324,18 @@ class GNSS_SDR():
 l_path = '/home/groundpaq/darren_space/gnss-sdr/data'
 
 # init
-dar_gnss = GNSS_SDR(name='dar', nTrack=1, log_path=l_path+'/darren_0629_c')
+dar_gnss = GNSS_SDR(name='dar', nTrack=1, log_path=l_path+'/darren_0629_e')
 sp_gnss = GNSS_SDR(name='spain', nTrack=1, log_path=l_path+'/spain')
 
-# actions
+##  ----- actions -----
 # %%
-sp_gnss.plot_acq()
-sp_gnss.plot_tracking(prn=1)
+# sp_gnss.plot_acq()
+# sp_gnss.plot_tracking(prn=1)
 # sp_gnss.plot_observables()
 
 # %% 
 dar_gnss.plot_acq()
-dar_gnss.plot_tracking(prn=1)
+dar_gnss.plot_tracking(prn=23)
 
 # %%
 plt.show()
