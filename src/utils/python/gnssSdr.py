@@ -54,7 +54,7 @@ class GNSS_SDR():
         # init actions
         self.handle_acquire()
         self.handle_tracking()
-        # self.handle_obs()
+        
 
     ## ----- LOADERS ------
     def handle_obs(self,):
@@ -77,7 +77,7 @@ class GNSS_SDR():
         else:
             self.nTrack = 1
         
-    def handle_telem(self,):
+    def handle_nav(self,):
         navArray = []
         
         for file in self.dir_files:
@@ -109,7 +109,7 @@ class GNSS_SDR():
         self.nAcquire = len(self.acqArray)
 
     ### ---- DICT PARSERS -------
-    def parseAcq(self, acqDict):
+    def parseAcq(self, acqDict, do_plot=False):
         ''' parse out the elements of the acquisition .mat 
         TBD what returns, for now return _time_s, acq_doppler
         '''
@@ -131,32 +131,40 @@ class GNSS_SDR():
         # result of test statistic
         test_stat = acqDict['test_statistic'][0]
         # 2d array results for acquisition 
-        acq_grid = acqDict['acq_grid']
-        f = np.arange(-dopplerMax, dopplerMax, dopplerStep)
-        tau = np.linspace(0, 1023, np.size(acq_grid,1))
-        F, T = np.meshgrid(f, tau)
-        A = np.reshape(acq_grid, F.shape)
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
-        surf = ax.plot_surface(F,T, A)
-        ax.set_xlabel('Frequencies (Hz)')
-        ax.set_ylabel('Delay (chips)')
-        fig.colorbar(surf)
+        
+        if do_plot:
+            acq_grid = acqDict['acq_grid']
+            f = np.arange(-dopplerMax, dopplerMax, dopplerStep)
+            tau = np.linspace(0, 1023, np.size(acq_grid,1))
+            F, T = np.meshgrid(f, tau)
+            A = np.reshape(acq_grid, F.shape)
+            fig = plt.figure()
+            ax = fig.add_subplot(111, projection='3d')
+            surf = ax.plot_surface(F,T, A)
+            ax.set_xlabel('Frequencies (Hz)')
+            ax.set_ylabel('Delay (chips)')
+            fig.colorbar(surf)
         
         self.printer("PRN %d Acquire Test Statistic: %.2f" % (prn, test_stat))
         
 
-    def parseNav(self, navDict):
-        ''' parse out the elements of a specified nav_data .mat: a 1d with len = number of epochs
+    def parseNav(self, navDict, do_plot=False):
+        ''' parse out the elements of a specified nav_data .mat:
+            a 1d with len = number of epochs
             (tracking integration times)
         
         '''
-        _time_sample = np.uint64(navDict['tracking_sample_counter'][0])
-        prn = np.uin32(navDict['PRN'][0])
-        TOW_cur_sym_ms = np.double(navDict['TOW_at_current_symbol_ms'][0])
-        TOW_preamble_ms = np.double(navDict['TOW_at_Preamble_ms'][0])
-        nav_data = [np.int32(x) for x in navDict['nav_symbol'][0]]
-        self.printer("done parseNav")
+        epoch_sample = navDict['tracking_sample_counter'].T[0]  # (nEpoch,1)
+        prn = navDict['PRN'].T[0]  # (nEpoch, 1)
+        TOW_cur_sym_ms = navDict['TOW_at_current_symbol_ms'].T[0]  # (nEpoch,1)
+        TOW_preamble_ms = navDict['TOW_at_Preamble_ms'].T[0]  # (nEpoch,1)
+        nav_data = navDict['nav_symbol'].T[0]  # (nEpoch, 1)
+        
+        if do_plot:
+            pass
+        
+        self.printer("done parseNav for PRN %d" % prn[0])
+        
 
     def parsePrnTrack(self, prn, do_plot=True):
         '''parse out the tracking data for a specific PRN '''
@@ -191,7 +199,7 @@ class GNSS_SDR():
         # time since track start (s)
         _time_s = trackDict['PRN_start_sample_count'].T[0,sample_idx:]/self.samplingFreq
         # prn under test
-        prn = trackDict['PRN'].T[0,sample_idx:]
+        prn = trackDict['PRN'].T[0,sample_idx:][0]
         # status of lock test
         carrier_lock = trackDict['carrier_lock_test'].T[0,sample_idx:]
         # doppler shift (Hz)
@@ -225,7 +233,7 @@ class GNSS_SDR():
             ax.plot(_time_s, carrier_dop, label='Doppler kHz')
             ax.set_xlabel('Time (s)')
             ax.set_ylabel('Doppler Freq [kHz]')
-            ax.set_title('Doppler Shift on Track 0')
+            ax.set_title('Doppler Shift on PRN %d' % prn)
             
             fig2, ax = plt.subplots(3,2)
             ax = ax.flat
@@ -261,32 +269,58 @@ class GNSS_SDR():
 
         return _time_s, carrier_dop, data_I, data_Q, dll, dll_raw, pll, pll_raw
 
-    def parseObserve(self,):
-        # rows = num Chan, columns = num of epochs
-        carrier_doppler_hz = self.obsDict['Carrier_Doppler_hz']
-        carrier_phase_cyc = self.obsDict['Carrier_phase_cycles']
-        valid_pseudorange = self.obsDict['Flag_valid_pseudorange']
-        prn_vec = self.obsDict['PRN']  # vec of headers for sat id 
-        psuedorange_m = self.obsDict['Pseudorange_m']
-        TOW_curr_sym_s = self.obsDict['TOW_at_current_symbol_s']
+    def parseObserve(self,do_plot=False):
+        # index 1 is number of the epoch
+        # index 2 is the track channel idx
+        
+        ## MAT 2d results:  each is (nEpoch, nTrack)
+        prn_mat = self.obsDict['PRN']  # vec prn's tracked 
+        carrier_doppler_hz_mat = self.obsDict['Carrier_Doppler_hz']
+        carrier_phase_cyc_mat = self.obsDict['Carrier_phase_cycles']
+        valid_pseudorange_mat = self.obsDict['Flag_valid_pseudorange']
+        psuedorange_m_mat = self.obsDict['Pseudorange_m']
+        TOW_curr_sym_s_mat = self.obsDict['TOW_at_current_symbol_s']
+       
+        nEpoch, nTrack = np.shape(prn_mat)
+        # index into MAT objs with 
+        e_idx, t_idx = np.nonzero(prn_mat)
+        
+        ## FLAT (1d) array of results
+        prn_vec = prn_mat[e_idx, t_idx]
+        carrier_doppler_hz = carrier_doppler_hz_mat[e_idx,t_idx]
+        carrier_phase_cyc = carrier_phase_cyc_mat[e_idx,t_idx]
+        valid_pseudorange = valid_pseudorange_mat[e_idx,t_idx]
+        psuedorange_m = psuedorange_m_mat[e_idx,t_idx]
+        TOW_curr_sym_s = TOW_curr_sym_s_mat[e_idx,t_idx]
+        
+        # @TODO: Come back later and index into this by prn instead of a flat array
+        
+        # fig, ax = plt.subplots()
+        # ax.plot(, carrier_dop, label='Doppler kHz')
+        # ax.set_xlabel('Time (s)')
+        # ax.set_ylabel('Doppler Freq [kHz]')
+        # ax.set_title('Doppler Shift on PRN %d' % prn)
+            
         print("done parse Observe")
         
         
     # HIGH LEVEL ACTIONS
-    def plot_acq(self,):
+    def plot_acq(self,do_plot=False):
         # see https://gnss-sdr.org/docs/sp-blocks/acquisition/#plotting-results-with-matlaboctave
         if self.nAcquire>0:
             # plot the first acquired signal
-            self.parseAcq(self.acqArray[0])
+            self.parseAcq(self.acqArray[0],do_plot)
         else:
             self.printer("No Positive Acquires")
             
-    def plot_observables(self, ):
-        self.parseObserve()
+    def plot_observables(self, do_plot=False):
+        self.handle_obs()
+        self.parseObserve(do_plot)
     
-    def plot_nav(self,):
+    def plot_nav(self,do_plot=False):
+        self.handle_nav()
         for nIdx, navDict in enumerate(self.navArray):
-            self.parseNav(navDict)
+            self.parseNav(navDict,do_plot)
 
     def plot_tracking(self, prn=None, do_plot=True):
         ''' plot the tracking data
@@ -324,7 +358,9 @@ class GNSS_SDR():
 l_path = '/home/groundpaq/darren_space/gnss-sdr/data'
 
 # init
-dar_gnss = GNSS_SDR(name='dar', nTrack=1, log_path=l_path+'/darren_0629_e')
+# dar_e = GNSS_SDR(name='dar', nTrack=1, log_path=l_path+'/darren_0629_e')
+dar_f = GNSS_SDR(name='dar', nTrack=1, log_path=l_path+'/darren_0629_f')
+# dar_g = 3
 sp_gnss = GNSS_SDR(name='spain', nTrack=1, log_path=l_path+'/spain')
 
 ##  ----- actions -----
@@ -334,9 +370,10 @@ sp_gnss = GNSS_SDR(name='spain', nTrack=1, log_path=l_path+'/spain')
 # sp_gnss.plot_observables()
 
 # %% 
-dar_gnss.plot_acq()
-dar_gnss.plot_tracking(prn=23)
-
+dar_f.plot_acq()
+dar_f.plot_tracking(prn=23)
+dar_f.plot_observables()
+dar_f.plot_nav()
 # %%
 plt.show()
 print("gnssSdr.py end\n")
