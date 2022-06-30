@@ -86,45 +86,50 @@ class USRP_RAW():
     
     
 #%%
-if __name__ == "__main__":
+# if __name__ == "__main__":
     
-    print("plot_usrp.py startup\n")
+#     print("plot_usrp.py startup\n")
 
-    ## -- PARSER ----
-    parser = argparse.ArgumentParser(description=''' 
-    This script is a class for quickview of usrp recorded data ''')
+#     ## -- PARSER ----
+#     parser = argparse.ArgumentParser(description=''' 
+#     This script is a class for quickview of usrp recorded data ''')
     
-    # setup params
-    parser.add_argument('-n','--name', action='store', nargs=1, type=str,
-                        default='usrp_samples.dat', help='the filename to analyze')
-    parser.add_argument('-fs','--sampFreq', action='store', nargs=1, type=int,
-                        default=3e6, help='the sampling freq of the collection')
-    parser.add_argument('-nSec','--duration', action='store', nargs=1, type=float,
-                        default=5, help='the duration of the collection (s)')
+#     # setup params
+#     parser.add_argument('-n','--name', action='store', nargs=1, type=str,
+#                         default='usrp_samples.dat', help='the filename to analyze')
+#     parser.add_argument('-fs','--sampFreq', action='store', nargs=1, type=int,
+#                         default=3e6, help='the sampling freq of the collection')
+#     parser.add_argument('-nSec','--duration', action='store', nargs=1, type=float,
+#                         default=5, help='the duration of the collection (s)')
     
-    gnss_path = '/home/groundpaq/darren_space/gnss-sdr/data/'
-    usrp_path = '/home/groundpaq/darren_space/gnss-sdr/work/'
-    
-    
-    # TODO: make name load dynamic
-    
-    # %% 
-    # init
-    a_trial = USRP_RAW(l_path=usrp_path, nSec=5, Fs=3e6, typ='i')   # default with no signal
-     # with gps signal turn on
+gnss_path = '/home/groundpaq/darren_space/gnss-sdr/data/'
+usrp_path = '/home/groundpaq/darren_space/gnss-sdr/work/'
+
+
+# TODO: make name load dynamic
+
+
+# init
+# a_trial = USRP_RAW(l_path=usrp_path, nSec=5, Fs=3e6, typ='i')   # default with no signal
+    # with gps signal turn on
 #    a_trial = USRP_RAW(l_path='/var/log/gpaq/usrp_float_2s.dat', nSec=2, Fs=3e6, typ='f')
 #    a_trial = USRP_RAW(l_path='/var/log/gpaq/usrp_short_2s.dat', nSec=2, Fs=3e6, typ='i')
 
-    # real GPS signals
-    a_trial = USRP_RAW(l_path=usrp_path + 'usrp_L1_60s_2m.dat', nSec=60, Fs=2e6, typ='i')
-    a_trial = USRP_RAW(l_path=usrp_path + 'usrp_L1_60s.dat', nSec=60, Fs=3e6, typ='i')
-    a_trial = USRP_RAW(l_path=usrp_path + 'usrp_L1_30s.dat', nSec=30, Fs=3e6, typ='f')
-    
-    
+# real GPS signals
+# a_trial = USRP_RAW(l_path=usrp_path + 'usrp_L1_60s_2m.dat', nSec=60, Fs=2e6, typ='i')
+# a_trial = USRP_RAW(l_path=usrp_path + 'usrp_L1_60s.dat', nSec=60, Fs=3e6, typ='i')
+# a_trial = USRP_RAW(l_path=usrp_path + 'usrp_L1_30s.dat', nSec=30, Fs=3e6, typ='f')
 
-    # actions
-    a_trial.plot_usrp()
+# 6/29
+off_trial = USRP_RAW(l_path=usrp_path + 'usrp_mini_short_5s.dat', nSec=5, Fs=3e6, typ='i')
+bias_trial = USRP_RAW(l_path=usrp_path + 'usrp_mini_short_bias_5s.dat', nSec=5, Fs=3e6, typ='i')
 
-    plt.show()
-    print("plot_usrp.py end\n")
+# actions
+off_trial.plot_usrp()
+bias_trial.plot_usrp()
+
+plt.show()
+print("plot_usrp.py end\n")
+
+
 # %%

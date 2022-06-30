@@ -157,7 +157,21 @@ class GNSS_SDR():
         TOW_preamble_ms = np.double(navDict['TOW_at_Preamble_ms'][0])
         nav_data = [np.int32(x) for x in navDict['nav_symbol'][0]]
         self.printer("done parseNav")
+
+    def parsePrnTrack(self, prn, do_plot=True):
+        '''parse out the tracking data for a specific PRN '''
         
+        if self.trackArray is None:
+            self.printer("No tracks to search")
+        else:
+            for trackDict in self.trackArray:
+                this_prn = trackDict['PRN'][0][0]
+                if this_prn==prn:
+                    self.parseTrack(trackDict,do_plot)
+                    break
+                else:
+                    continue
+                
     def parseTrack(self, trackDict, do_plot=True):
         ''' parse out the contents of the track .mat 
         TBD what fields you want returned, for now just _time_s, carrier_dop
@@ -269,14 +283,20 @@ class GNSS_SDR():
         for nIdx, navDict in enumerate(self.navArray):
             self.parseNav(navDict)
 
-    def plot_tracking(self):
+    def plot_tracking(self, prn=None, do_plot=True):
+        ''' plot the tracking data
+        @param prn [int]: (optional) choose a PRN satellite number, default None
+        @param do_plot [bool]: enable track plotting 
+        '''
         # see field names in https://gnss-sdr.org/docs/sp-blocks/tracking/#plotting-results-with-matlaboctave
-        
+        if prn:
+            self.parsePrnTrack(prn)
+            return
         if self.nTrack == 1:
-            self.parseTrack(self.trackArray[0],do_plot=True)
+            self.parseTrack(self.trackArray[0],do_plot=do_plot)
         else:
             for tIdx, trackDict in enumerate(self.trackArray):
-                self.parseTrack(trackDict,do_plot=True)
+                self.parseTrack(trackDict,do_plot=do_plot)
 
     ## ----------- UTILITIES ------------- ##
     def printer(self, strg):
@@ -299,18 +319,18 @@ class GNSS_SDR():
 l_path = '/home/groundpaq/darren_space/gnss-sdr/data'
 
 # init
-# dar_gnss = GNSS_SDR(name='dar', nTrack=1, log_path=l_path+'/darren')
+dar_gnss = GNSS_SDR(name='dar', nTrack=1, log_path=l_path+'/darren_0629_c')
 sp_gnss = GNSS_SDR(name='spain', nTrack=1, log_path=l_path+'/spain')
 
 # actions
 # %%
 sp_gnss.plot_acq()
-sp_gnss.plot_tracking()
-sp_gnss.plot_observables()
+sp_gnss.plot_tracking(prn=1)
+# sp_gnss.plot_observables()
 
 # %% 
-# dar_gnss.plot_acq()
-# dar_gnss.plot_tracking()
+dar_gnss.plot_acq()
+dar_gnss.plot_tracking(prn=1)
 
 # %%
 plt.show()
