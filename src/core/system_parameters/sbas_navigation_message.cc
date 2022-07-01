@@ -22,12 +22,17 @@
 #include <limits>  // for std::numeric_limits
 
 
+/* DR: this file has a lot of work to get functional; i copied the gps_navigation_message.cc.
+    and actually it might be redundant to items in sbas_l1_telemetry_decoder; 
+    tbd */
+
+
 Sbas_Navigation_Message::Sbas_Navigation_Message()
 {
     Gnss_Satellite gnss_satellite_ = Gnss_Satellite();
     for (uint32_t prn_ = 1; prn_ < 33; prn_++)
         {
-            satelliteBlock[prn_] = gnss_satellite_.what_block("GPS", prn_);
+            satelliteBlock[prn_] = gnss_satellite_.what_block("SBAS", prn_);
         }
     b_flag_iono_valid = false;
     b_flag_utc_valid = false;

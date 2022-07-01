@@ -157,6 +157,7 @@ Gps_L1_Ca_Kf_Tracking_cc::Gps_L1_Ca_Kf_Tracking_cc(
     d_Prompt_buffer = volk_gnsssdr::vector<gr_complex>(FLAGS_cn0_samples);
 
     systemName["G"] = std::string("GPS");
+    // DR: ref to sbas, how does this get here?
     systemName["S"] = std::string("SBAS");
 
     set_relative_rate(1.0 / static_cast<double>(d_vector_length));
