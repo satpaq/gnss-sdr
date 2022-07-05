@@ -25,9 +25,9 @@
  * \{ */
 
 
-constexpr double FREQ1 = 1.57542e9;       //!<  L1/E1  frequency (Hz)
+constexpr double FREQ1 = 1.57542e9;       //!<  L1/E1/SBAS  frequency (Hz)
 constexpr double FREQ2 = 1.22760e9;       //!<  L2     frequency (Hz)
-constexpr double FREQ5 = 1.17645e9;       //!<  L5/E5a frequency (Hz)
+constexpr double FREQ5 = 1.17645e9;       //!<  L5/E5a/SBAS frequency (Hz)
 constexpr double FREQ6 = 1.27875e9;       //!<  E6/LEX frequency (Hz)
 constexpr double FREQ7 = 1.20714e9;       //!<  E5b    frequency (Hz)
 constexpr double FREQ8 = 1.191795e9;      //!<  E5a+b  frequency (Hz)

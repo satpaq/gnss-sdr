@@ -82,6 +82,8 @@ sbas_l1_telemetry_decoder_gs::~sbas_l1_telemetry_decoder_gs()
 
 void sbas_l1_telemetry_decoder_gs::set_satellite(const Gnss_Satellite &satellite)
 {
+    /* DR: there should be nav message object here, if we're trying to match GPS L1 telem
+    it looks like there are helper classes down below that may do similar func, more work to be done */
     d_satellite = Gnss_Satellite(satellite.get_system(), satellite.get_PRN());
     LOG(INFO) << "SBAS telemetry decoder in channel " << this->d_channel << " set to satellite " << d_satellite;
 }

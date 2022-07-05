@@ -190,10 +190,11 @@ void Gnss_Satellite::set_PRN(uint32_t PRN_)
         {
             if ((PRN_ == 120)      // EGNOS Test Platform.Inmarsat 3-F2 (Atlantic Ocean Region-East)
                 || (PRN_ == 123)   // EGNOS Operational Platform. Astra 5B
-                || (PRN_ == 131)   // WAAS Eutelsat 117 West B
-                || (PRN_ == 135)   // WAAS Galaxy 15
+                || (PRN_ == 131)   // WAAS Eutelsat 117 West B  (117W)
+                || (PRN_ == 133)   // WAAS SES-15  (129W)
+                || (PRN_ == 135)   // WAAS Galaxy 30  (125W)
                 || (PRN_ == 136)   // EGNOS Operational Platform. SES-5 (a.k.a. Sirius 5 or Astra 4B)
-                || (PRN_ == 138))  // WAAS Anik F1R
+                // || (PRN_ == 138))  // WAAS Anik F1R
                 {
                     PRN = PRN_;
                 }

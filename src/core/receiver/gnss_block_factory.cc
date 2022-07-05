@@ -324,17 +324,20 @@ std::unique_ptr<GNSSBlockInterface> GNSSBlockFactory::GetObservables(const Confi
     Glonass_channels += configuration->property("Channels_2G.count", 0);
     unsigned int Beidou_channels = configuration->property("Channels_B1.count", 0);
     Beidou_channels += configuration->property("Channels_B3.count", 0);
+    unsigned int SBAS_channels += configuration->property("Channels_S1.count",0);
     unsigned int extra_channels = 1;  // For monitor channel sample counter
     return GetBlock(configuration, "Observables",
         Galileo_channels +
             GPS_channels +
             Glonass_channels +
             Beidou_channels +
+            SBAS_channels +
             extra_channels,
         Galileo_channels +
             GPS_channels +
             Glonass_channels +
-            Beidou_channels);
+            Beidou_channels
+            SBAS_channels);
 }
 
 
@@ -359,8 +362,9 @@ std::unique_ptr<GNSSBlockInterface> GNSSBlockFactory::GetPVT(const Configuration
     Glonass_channels += configuration->property("Channels_2G.count", 0);
     unsigned int Beidou_channels = configuration->property("Channels_B1.count", 0);
     Beidou_channels += configuration->property("Channels_B3.count", 0);
+    unsigned int SBAS_channels += configuration->property("Channels_S1.count",0);
     return GetBlock(configuration, "PVT",
-        Galileo_channels + GPS_channels + Glonass_channels + Beidou_channels, 0);
+        Galileo_channels + GPS_channels + Glonass_channels + Beidou_channels + SBAS_channels, 0);
 }
 
 
@@ -453,7 +457,8 @@ std::unique_ptr<std::vector<std::unique_ptr<GNSSBlockInterface>>> GNSSBlockFacto
     const unsigned int Channels_B3_count = configuration->property("Channels_B3.count", 0);
     const unsigned int Channels_7X_count = configuration->property("Channels_7X.count", 0);
     const unsigned int Channels_E6_count = configuration->property("Channels_E6.count", 0);
-
+    const unsigned int Channels_S1_count = configuration->property("Channels_S1.count", 0);
+    
     const unsigned int total_channels = Channels_1C_count +
                                         Channels_1B_count +
                                         Channels_1G_count +
@@ -464,7 +469,8 @@ std::unique_ptr<std::vector<std::unique_ptr<GNSSBlockInterface>>> GNSSBlockFacto
                                         Channels_B1_count +
                                         Channels_B3_count +
                                         Channels_7X_count +
-                                        Channels_E6_count;
+                                        Channels_E6_count +
+                                        Channels_S1_count;
 
     auto channels = std::make_unique<std::vector<std::unique_ptr<GNSSBlockInterface>>>(total_channels);
     try
@@ -477,6 +483,19 @@ std::unique_ptr<std::vector<std::unique_ptr<GNSSBlockInterface>>> GNSSBlockFacto
                     // Store the channel into the vector of channels
                     channels->at(channel_absolute_id) = GetChannel(configuration,
                         std::string("1C"),
+                        channel_absolute_id,
+                        queue);
+                    channel_absolute_id++;
+                }
+
+            // **************** SBAS L1 C/A CHANNELS ****************************
+            LOG(INFO) << "Getting " << Channels_S1_count << " SBAS L1 C/A channels";
+
+            for (unsigned int i = 0; i < Channels_S1_count; i++)
+                {
+                    // Store the channel into the vector of channels
+                    channels->at(channel_absolute_id) = GetChannel(configuration,
+                        std::string("S1"),
                         channel_absolute_id,
                         queue);
                     channel_absolute_id++;
@@ -1278,7 +1297,7 @@ std::unique_ptr<GNSSBlockInterface> GNSSBlockFactory::GetBlock(
 
             // OBSERVABLES -------------------------------------------------------------
             else if ((implementation == "Hybrid_Observables") || (implementation == "GPS_L1_CA_Observables") || (implementation == "GPS_L2C_Observables") ||
-                     (implementation == "Galileo_E5A_Observables"))
+                     (implementation == "Galileo_E5A_Observables") || (implementation == "SBAS_Observables"))
                 {
                     std::unique_ptr<GNSSBlockInterface> block_ = std::make_unique<HybridObservables>(configuration, role, in_streams,
                         out_streams);
