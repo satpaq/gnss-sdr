@@ -1498,8 +1498,8 @@ int GNSSFlowgraph::assign_channels()
     if (configuration_->property("Channels_S1.count", uint64_t(0ULL)) > available_SBAS_1C_signals_.size() - 1)
         {
             help_hint_ += " * The number of SBAS L1 channels is set to Channels_1C.count=" + std::to_string(configuration_->property("Channels_S1.count", 0));
-            help_hint_ += " but the maximum number of available GPS satellites is " + std::to_string(available_GPS_S1_signals_.size()) + ".\n";
-            help_hint_ += " Please set Channels_S1.count=" + std::to_string(available_GPS_S1_signals_.size() - 1) + " or lower in your configuration file.\n";
+            help_hint_ += " but the maximum number of available GPS satellites is " + std::to_string(available_SBAS_1C_signals_.size()) + ".\n";
+            help_hint_ += " Please set Channels_S1.count=" + std::to_string(available_SBAS_1C_signals_.size() - 1) + " or lower in your configuration file.\n";
             top_block_->disconnect_all();
             return 1;
         }
@@ -2879,10 +2879,10 @@ Gnss_Signal GNSSFlowgraph::search_next_signal(const std::string& searched_signal
                             if (std::string(current_status.second->Signal) == "1B")
                                 {
                                     std::list<Gnss_Signal>::iterator it2;
-                                    it2 = std::find_if(std::begin(available_SBAS_1C_signals_), std::end(available_SBAS_1c_signals_),
+                                    it2 = std::find_if(std::begin(available_SBAS_1C_signals_), std::end(available_SBAS_1C_signals_),
                                         [&](Gnss_Signal const& sig) { return sig.get_satellite().get_PRN() == current_status.second->PRN; });
 
-                                    if (it2 != available_SBAS_1c_signals_.end())
+                                    if (it2 != available_SBAS_1C_signals_.end())
                                         {
                                             estimated_doppler = static_cast<float>(current_status.second->Carrier_Doppler_hz);
                                             RX_time = current_status.second->RX_time;

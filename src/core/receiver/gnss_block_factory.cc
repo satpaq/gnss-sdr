@@ -324,7 +324,7 @@ std::unique_ptr<GNSSBlockInterface> GNSSBlockFactory::GetObservables(const Confi
     Glonass_channels += configuration->property("Channels_2G.count", 0);
     unsigned int Beidou_channels = configuration->property("Channels_B1.count", 0);
     Beidou_channels += configuration->property("Channels_B3.count", 0);
-    unsigned int SBAS_channels += configuration->property("Channels_S1.count",0);
+    unsigned int SBAS_channels = configuration->property("Channels_S1.count",0);
     unsigned int extra_channels = 1;  // For monitor channel sample counter
     return GetBlock(configuration, "Observables",
         Galileo_channels +
@@ -336,7 +336,7 @@ std::unique_ptr<GNSSBlockInterface> GNSSBlockFactory::GetObservables(const Confi
         Galileo_channels +
             GPS_channels +
             Glonass_channels +
-            Beidou_channels
+            Beidou_channels +
             SBAS_channels);
 }
 
@@ -362,7 +362,7 @@ std::unique_ptr<GNSSBlockInterface> GNSSBlockFactory::GetPVT(const Configuration
     Glonass_channels += configuration->property("Channels_2G.count", 0);
     unsigned int Beidou_channels = configuration->property("Channels_B1.count", 0);
     Beidou_channels += configuration->property("Channels_B3.count", 0);
-    unsigned int SBAS_channels += configuration->property("Channels_S1.count",0);
+    unsigned int SBAS_channels = configuration->property("Channels_S1.count",0);
     return GetBlock(configuration, "PVT",
         Galileo_channels + GPS_channels + Glonass_channels + Beidou_channels + SBAS_channels, 0);
 }
