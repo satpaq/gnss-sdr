@@ -71,7 +71,7 @@ public:
     int32_t max_code_lock_fail{0};
     int32_t max_carrier_lock_fail{0};
     char signal[3]{};
-    char system{'G'};
+    char system{};
     bool enable_fll_pull_in{false};
     bool enable_fll_steady_state{false};
     bool track_pilot{true};

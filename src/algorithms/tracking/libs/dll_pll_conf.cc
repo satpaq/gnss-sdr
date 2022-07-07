@@ -23,6 +23,8 @@
 
 Dll_Pll_Conf::Dll_Pll_Conf() : carrier_lock_th(FLAGS_carrier_lock_th),
                                cn0_samples(FLAGS_cn0_samples),
+                            //    system(FLAGS_system),
+                            //    signal(FLAGS_signal),
                                cn0_min(FLAGS_cn0_min),
                                max_code_lock_fail(FLAGS_max_lock_fail),
                                max_carrier_lock_fail(FLAGS_max_carrier_lock_fail)
@@ -30,9 +32,10 @@ Dll_Pll_Conf::Dll_Pll_Conf() : carrier_lock_th(FLAGS_carrier_lock_th),
     signal[0] = '1';
     signal[1] = 'C';
     signal[2] = '\0';
+    system = 'G';  // OR 'W' for SBAS
 }
 
-
+// DR: eventually make the G vs W configurable from the .conf file
 void Dll_Pll_Conf::SetFromConfiguration(const ConfigurationInterface *configuration,
     const std::string &role)
 {
