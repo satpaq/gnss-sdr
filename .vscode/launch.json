@@ -4,6 +4,7 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+        
         {
             "name": "Python: Current File",
             "type": "python",
@@ -16,11 +17,37 @@
             "name": "tracking plot",
             "type": "python",
             "args": [
-                "-hr", "8", // sim length 
+                "-hr",
+                "8", // sim length 
             ],
             "request": "launch",
             "cwd": "${workspaceFolder}",
             "program": "src/utils/python/plot_tracking.py",
+            "console": "integratedTerminal",
+            "redirectOutput": false,
+        },
+        {
+            "name": "grab_data",
+            "type": "python",
+            "args": [
+                "-n", "test_file.dat",  // file to save away
+            ],
+            "request": "launch",
+            "cwd": "${workspaceFolder}/work",
+            "program": "grab_data.py",
+            "console": "integratedTerminal",
+            "redirectOutput": false,
+        },
+        {
+            "name": "process gnss-sdr",
+            "type": "python",
+            "args": [
+                "-c", "d",  // one of 'd','s','w' for picking which config to run
+                "-f", "mini_0706_30s_4m_short_g50_trialA.dat"
+            ],
+            "request": "launch",
+            "cwd": "${workspaceFolder}/work",
+            "program": "process_data.py",
             "console": "integratedTerminal",
             "redirectOutput": false,
         },
