@@ -34,7 +34,7 @@ def load_dumpMat(fname: str) -> dict:
 class GNSS_SDR():
     ''' class for gathering data from running GNSS-SDR '''
 
-    def __init__(self, name,  log_path, nTrack=None, debug_level=0,):
+    def __init__(self, name,  log_path, nTrack=8, debug_level=0,):
         ''' Constructor
         @param name [str]: name of this collection
         @param nTrack [int]: number of tracking channels to look at
@@ -189,7 +189,7 @@ class GNSS_SDR():
                 elif dictDim == 2:
                     this_prn = trackDict['PRN'][0][0]
                 
-                if this_prn==prn:
+                if this_prn==prn: 
                     self.parseTrack(trackDict,do_plot)
                     break
                 else:
@@ -210,6 +210,7 @@ class GNSS_SDR():
         _time_s = trackDict['PRN_start_sample_count'].T[0,sample_idx:]/self.samplingFreq
         # prn under test
         prn = trackDict['PRN'].T[0,sample_idx:][0]
+        
         # status of lock test
         carrier_lock = trackDict['carrier_lock_test'].T[0,sample_idx:]
         # doppler shift (Hz)
@@ -239,55 +240,41 @@ class GNSS_SDR():
         data_Q = trackDict['Prompt_Q'].T[0,sample_idx:]
 
         if do_plot:
-            fig, ax3 = plt.subplots()
-            ax3.plot(_time_s, carrier_dop, label='Doppler kHz')
-            ax3.set_xlabel('Time (s)')
-            ax3.set_ylabel('Doppler Freq [kHz]')
-            ax3.set_title('Doppler Shift on PRN %d' % prn)
+            print("Plot Tracking of PRN %d" % prn)
             
-            fig2, ax = plt.subplots(3,2)
-            ax = ax.flat
-            ax[0].plot(data_I, data_Q, '.')
-            ax[0].set_xlabel('I Data')
-            ax[0].set_ylabel('Q Data')
-            ax[0].set_title("Discrete-Time Constellation Diagram")
+            # # carrier error output
+            # fig, ax3 = plt.subplots()
+            # ax3.plot(_time_s, carrier_dop, label='Doppler kHz')
+            # ax3.set_xlabel('Time (s)')
+            # ax3.set_ylabel('Doppler Freq [kHz]')
+            # ax3.set_title('Doppler Shift on PRN %d' % prn)
             
-            ax[1].plot(_time_s, data_I,)
-            ax[1].set_xlabel('Time (s)')
-            ax[0].set_ylabel('I Data')
-            ax[1].set_title("Bits of Nav Message")
+            fig2, ax = plt.subplot_mosaic([['tl','tr'], ['ml','mr'], ['b','b']], constrained_layout=True)
             
-            ax[2].plot(_time_s, pll_raw)
-            ax[2].set_xlabel('Time (s)')
-            ax[2].set_ylabel('Amplitude')
-            ax[2].set_title('Raw PLL Discrim')
+            ax['tl'].plot(data_I, data_Q, '.')
+            ax['tl'].set_xlabel('I Data')
+            ax['tl'].set_ylabel('Q Data')
+            ax['tl'].set_title("Constellation Diagram")
             
-            ax[3].plot(_time_s, pll)
-            ax[3].set_xlabel('Time (s)')
-            ax[3].set_ylabel('Amplitude')
-            ax[3].set_title('Filtered PLL Discrim')
-            
-            ax[4].plot(_time_s, dll_raw)
-            ax[4].set_xlabel('Time (s)')
-            ax[4].set_ylabel('Amplitude')
-            ax[4].set_title('Raw DLL Discrim')
-            
-            ax[5].plot(_time_s, dll)
-            ax[5].set_xlabel('Time (s)')
-            ax[5].set_ylabel('Amplitude')
-            ax[5].set_title('Filtered DLL Discrim')
+            ax['tr'].plot(_time_s, carrier_lock,)
+            # ax['tr'].set_xlabel('Time (s)')
+            ax['tr'].set_ylabel('Carrier Lock')
+            ax['tr'].set_title("PRN %d Carrier Lock" % prn)
+                        
+            ax['ml'].plot(_time_s, pll)
+            ax['ml'].set_xlabel('Time (s)')
+            ax['ml'].set_ylabel('Amplitude')
+            ax['ml'].set_title('Filtered PLL Discrim')
+        
+            ax['mr'].plot(_time_s, dll)
+            ax['mr'].set_xlabel('Time (s)')
+            ax['mr'].set_ylabel('Amplitude')
+            ax['mr'].set_title('Filtered DLL Discrim')
 
-            fig2, ax2 = plt.subplots(3,1,sharex=True)
-            ax2[0].plot(_time_s, carrier_lock)
-            ax2[0].set_title('Carrier Lock test output')
-            ax2[0].set_ylabel('Lock Status')
-            ax2[1].plot(_time_s, cn0_dB)
-            ax2[1].set_title('Carrier CN0')
-            ax2[1].set_ylabel('CN0 (dB)')
-            ax2[2].plot(_time_s, acc_carrier_phase)
-            ax2[2].set_title('Accum Carrier Phase CN0')
-            ax2[2].set_ylabel('Phase (rad)')
-            ax2[2].set_xlabel('Time (s)')
+            ax['b'].plot(_time_s, acc_carrier_phase)
+            ax['b'].set_title('Accum Carrier Phase')
+            ax['b'].set_ylabel('Phase (rad)')
+            ax['b'].set_xlabel('Time (s)')
             
         return _time_s, carrier_dop, data_I, data_Q, dll, dll_raw, pll, pll_raw
 
@@ -345,7 +332,7 @@ class GNSS_SDR():
             ax[1].plot(tVec, carrier_doppler_hz.T)
             ax[1].set_xlabel('Time From Start (s)')
             ax[1].set_ylabel('Doppler Freq [kHz]')
-            ax[1].set_title('Doppler Shift on 8 Channels')
+            ax[1].set_title('Doppler Freq on 8 Channels')
         
         self.printer("done parse Observe")
         
@@ -385,8 +372,6 @@ class GNSS_SDR():
         if prn:
             self.parsePrnTrack(prn)
             return
-        if self.nTrack == 1:
-            self.parseTrack(self.trackArray[0],do_plot=do_plot)
         else:
             for tIdx, trackDict in enumerate(self.trackArray):
                 self.parseTrack(trackDict,do_plot=do_plot)
@@ -398,10 +383,14 @@ class GNSS_SDR():
             
     def plot_observables(self, do_plot=False):
         self.handle_obs()
+        if do_plot:
+            print("Plot Observables")
         self.parseObserve(do_plot)
     
     def plot_pvt(self,do_plot=False):
         self.handle_pvt()
+        if do_plot:
+            print("Plot PVT")
         self.parsePvt(do_plot)
 
     
@@ -426,27 +415,37 @@ class GNSS_SDR():
 
 l_path = '/home/groundpaq/darren_space/gnss-sdr/data'
 
-# init
-# dar_e = GNSS_SDR(name='dar', nTrack=1, log_path=l_path+'/darren_0629_e')
-dar_f = GNSS_SDR(name='dar', nTrack=1, log_path=l_path+'/darren_0629_f')
-# dar_g = 3
+
+
+do_plot = True
+##  ----- actions -----
+# %%  SPAIN
+print("SPAIN PLOTS")
 sp_gnss = GNSS_SDR(name='spain', nTrack=1, log_path=l_path+'/spain_0707')
 
-##  ----- actions -----
-# %%
-print("SPAIN PLOTS")
 # sp_gnss.plot_acq()
-do_plot = True
 sp_gnss.plot_tracking(prn=32)
 sp_gnss.plot_observables(do_plot)
 # sp_gnss.plot_nav(do_plot)   # not yet working, @TODO: need to dig into CPP to understand .dat output
 # sp_gnss.plot_pvt(do_plot)
-# %% 
+
+# %%  DARREN
+# select which darren run to analyze
+fname_e = '/darren_0629_e'
+fname_f = '/darren_0629_f'
+fname_a = '/darren/mini_0706_30s_4m_short_g50_trialA'
+fname_b = '/darren/mini_0706_60s_4m_short_g50_trialB'
+fname_f2 = '/darren/usrp_mini_60s_4m_f'
+fname = fname_f2
+dar = GNSS_SDR(name='dar', log_path=l_path+fname)
+
 print("DARREN PLOTS")
 # dar_f.plot_acq()
-dar_f.plot_tracking(prn=23)
-dar_f.plot_observables(do_plot)
-# dar_f.plot_nav()
+dar.plot_tracking(prn=23)
+dar.plot_tracking(prn=10)
+dar.plot_observables(do_plot)
+# dar.plot_nav(do_plot)
+# dar.plot_pvt(do_plot)
 # %%
 plt.show()
 print("gnssSdr.py end\n")
