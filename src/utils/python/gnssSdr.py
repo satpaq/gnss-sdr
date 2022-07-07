@@ -12,7 +12,6 @@ import h5py
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-#matplotlib inline
 import argparse
 import sys, os, shutil
 
@@ -45,15 +44,10 @@ class GNSS_SDR():
         self.nTrack = nTrack
         self.log_path = log_path
         self.name = name
-        self.tVec = np.arange(self.nTrack)
         self.debugLvl = debug_level
-        self.samplingFreq = 3e6 # Hz
+        self.samplingFreq = 4e6 # Hz
 
-        self.dir_files = os.listdir(self.log_path)
-
-        # init actions
-        self.handle_acquire()
-        self.handle_tracking()
+        self.dir_files = os.listdir(self.log_path)       
         
 
     ## ----- LOADERS ------
@@ -373,31 +367,20 @@ class GNSS_SDR():
         
     # HIGH LEVEL ACTIONS
     def plot_acq(self,do_plot=False):
+        self.handle_acquire()
         # see https://gnss-sdr.org/docs/sp-blocks/acquisition/#plotting-results-with-matlaboctave
         if self.nAcquire>0:
             # plot the first acquired signal
             self.parseAcq(self.acqArray[0],do_plot)
         else:
             self.printer("No Positive Acquires")
-            
-    def plot_observables(self, do_plot=False):
-        self.handle_obs()
-        self.parseObserve(do_plot)
-    
-    def plot_nav(self,do_plot=False):
-        self.handle_nav()
-        for nIdx, navDict in enumerate(self.navArray):
-            self.parseNav(navDict,do_plot)
-
-    def plot_pvt(self,do_plot=False):
-        self.handle_pvt()
-        self.parsePvt(do_plot)
 
     def plot_tracking(self, prn=None, do_plot=True):
         ''' plot the tracking data
         @param prn [int]: (optional) choose a PRN satellite number, default None
         @param do_plot [bool]: enable track plotting 
         '''
+        self.handle_tracking()
         # see field names in https://gnss-sdr.org/docs/sp-blocks/tracking/#plotting-results-with-matlaboctave
         if prn:
             self.parsePrnTrack(prn)
@@ -408,6 +391,20 @@ class GNSS_SDR():
             for tIdx, trackDict in enumerate(self.trackArray):
                 self.parseTrack(trackDict,do_plot=do_plot)
 
+    def plot_nav(self,do_plot=False):
+        self.handle_nav()
+        for nIdx, navDict in enumerate(self.navArray):
+            self.parseNav(navDict,do_plot)   
+            
+    def plot_observables(self, do_plot=False):
+        self.handle_obs()
+        self.parseObserve(do_plot)
+    
+    def plot_pvt(self,do_plot=False):
+        self.handle_pvt()
+        self.parsePvt(do_plot)
+
+    
     ## ----------- UTILITIES ------------- ##
     def printer(self, strg):
         if self.debugLvl > 1:
