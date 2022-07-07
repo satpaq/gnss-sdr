@@ -9,14 +9,19 @@ import sys, os, shutil
 
 class RunGnssSdr():
         
-    def __init__(self, conf_typ, dat_path, ):
+    def __init__(self, conf_typ, dat_path, do_log=False):
         ''' Constructor '''
+        # defualt case: output IO to shell, not log file
+        self.do_log = do_log
         
-        if dat_path.endswith('.dat'):
-            self.in_fpath = dat_path
+        if conf_typ=='s':
+            self.in_fpath = '/home/groundpaq/darren_space/gnss-sdr/work/2013_04_04_GNSS_SIGNAL_at_CTTC_SPAIN/2013_04_04_GNSS_SIGNAL_at_CTTC_SPAIN.dat'
         else:
-            print("input file must be a .dat")
-            exit
+            if dat_path.endswith('.dat'):
+                self.in_fpath = dat_path
+            else:
+                print("input file must be a .dat")
+                exit
         
         
         self.args = ''
@@ -29,7 +34,7 @@ class RunGnssSdr():
         self.set_std_out()
         
         script = "gnss-sdr"
-        cmd = script + self.args
+        cmd = script # + self.args
         print("running:: %s" % cmd)
         result = subprocess.run(["bash", "-c", cmd], text=True)
         result.check_returncode()
@@ -42,13 +47,14 @@ class RunGnssSdr():
             conf_file = 'gnss-sdr_GPS_L1_darren.conf'
         elif conf_typ=='s':
             conf_file = 'gnss-sdr_GPS_L1_spain.conf'
+            
         elif conf_typ=='w':
             conf_file = 'gnss-sdr_GPS_L1_sbas.conf'
         else:
             print("bad conf type given, quitting")
             exit
         self.conf_file = conf_file
-        self.dir_prefix = conf_file.split('_')[-1].split('.')[0]
+        self.dir_prefix = conf_file.split('_')[-1].split('.')[0]  # grab out the _NAME.conf
         self.args += ' --config_file=%s' % self.conf_file
                 
     def set_output_dir(self,):
@@ -65,7 +71,8 @@ class RunGnssSdr():
             
     def set_log_file(self,):
         ''' set up the filename of the log files, inside the output_dir'''
-        self.args += ' --log_dir=%s' % self.out_dir 
+        if self.do_log:
+            self.args += ' --log_dir=%s' % self.out_dir 
     def set_dat_file(self,):
         ''' set up the loaded dat file'''
         self.args += ' --signal_source=%s' % self.in_fpath 
