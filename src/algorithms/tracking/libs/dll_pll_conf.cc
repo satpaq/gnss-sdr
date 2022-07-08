@@ -32,10 +32,10 @@ Dll_Pll_Conf::Dll_Pll_Conf() : carrier_lock_th(FLAGS_carrier_lock_th),
     signal[0] = '1';
     signal[1] = 'C';
     signal[2] = '\0';
-    system = 'G';  // OR 'W' for SBAS
+    // system = 'G';  // OR 'S' for SBAS
 }
 
-// DR: eventually make the G vs W configurable from the .conf file
+// DR: eventually make the G vs S configurable from the .conf file
 void Dll_Pll_Conf::SetFromConfiguration(const ConfigurationInterface *configuration,
     const std::string &role)
 {
