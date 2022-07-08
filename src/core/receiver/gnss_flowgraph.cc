@@ -2872,34 +2872,40 @@ Gnss_Signal GNSSFlowgraph::search_next_signal(const std::string& searched_signal
             break;
 
         case evSBAS_1C:
-            if (configuration_->property("Channels_S1.count", 0) > 0)
-                {
-                    // 1. Get the current channel status map
-                    std::map<int, std::shared_ptr<Gnss_Synchro>> current_channels_status = channels_status_->get_current_status_map();
-                    // 2. search the currently tracked Galileo E1 satellites and assist the Galileo E5 acquisition if the satellite is not tracked on E5
-                    for (auto& current_status : current_channels_status)
-                        {
-                            if (std::string(current_status.second->Signal) == "1B")
-                                {
-                                    std::list<Gnss_Signal>::iterator it2;
-                                    it2 = std::find_if(std::begin(available_SBAS_1C_signals_), std::end(available_SBAS_1C_signals_),
-                                        [&](Gnss_Signal const& sig) { return sig.get_satellite().get_PRN() == current_status.second->PRN; });
+            result = available_SBAS_1C_signals_.front();
+            available_SBAS_1C_signals_.pop_front();
+            available_SBAS_1C_signals_.push_back(result);
+            is_primary_frequency = true;  // indicate that the searched satellite signal belongs to "primary" link (L1, E1, B1, etc..)
+            break;
+            
+            // if (configuration_->property("Channels_S1.count", 0) > 0)
+            //     {
+            //         // 1. Get the current channel status map
+            //         std::map<int, std::shared_ptr<Gnss_Synchro>> current_channels_status = channels_status_->get_current_status_map();
+            //         // 2. search the currently tracked Galileo E1 satellites and assist the Galileo E5 acquisition if the satellite is not tracked on E5
+            //         for (auto& current_status : current_channels_status)
+            //             {
+            //                 if (std::string(current_status.second->Signal) == "1B")
+            //                     {
+            //                         std::list<Gnss_Signal>::iterator it2;
+            //                         it2 = std::find_if(std::begin(available_SBAS_1C_signals_), std::end(available_SBAS_1C_signals_),
+            //                             [&](Gnss_Signal const& sig) { return sig.get_satellite().get_PRN() == current_status.second->PRN; });
 
-                                    if (it2 != available_SBAS_1C_signals_.end())
-                                        {
-                                            estimated_doppler = static_cast<float>(current_status.second->Carrier_Doppler_hz);
-                                            RX_time = current_status.second->RX_time;
-                                            // std::cout << " Channel: " << it->first << " => Doppler: " << estimated_doppler << "[Hz] \n";
-                                            // 3. return the Gal E6 satellite and remove it from list
-                                            result = *it2;
-                                            available_SBAS_1C_signals_.erase(it2);
-                                            found_signal = true;
-                                            assistance_available = true;
-                                            break;
-                                        }
-                                }
-                        }
-                }
+            //                         if (it2 != available_SBAS_1C_signals_.end())
+            //                             {
+            //                                 estimated_doppler = static_cast<float>(current_status.second->Carrier_Doppler_hz);
+            //                                 RX_time = current_status.second->RX_time;
+            //                                 // std::cout << " Channel: " << it->first << " => Doppler: " << estimated_doppler << "[Hz] \n";
+            //                                 // 3. return the Gal E6 satellite and remove it from list
+            //                                 result = *it2;
+            //                                 available_SBAS_1C_signals_.erase(it2);
+            //                                 found_signal = true;
+            //                                 assistance_available = true;
+            //                                 break;
+            //                             }
+            //                     }
+            //             }
+            //     }
             // fallback: pick the front satellite because there is no tracked satellites in E1 to assist E6
             if (found_signal == false)
                 {
