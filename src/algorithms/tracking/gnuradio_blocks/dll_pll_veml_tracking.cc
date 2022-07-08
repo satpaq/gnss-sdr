@@ -162,9 +162,13 @@ dll_pll_veml_tracking::dll_pll_veml_tracking(const Dll_Pll_Conf &conf_)
     map_signal_pretty_name["B1"] = "B1I";
     map_signal_pretty_name["B3"] = "B3I";
     map_signal_pretty_name["E6"] = "E6";
-
+    map_signal_pretty_name["S1"] = "SBAS";
     d_signal_pretty_name = map_signal_pretty_name[d_signal_type];
-
+    
+    //  DR: seems like ".system" is forced to 'G'.  it represents the Gnss_Synchro::System{} 
+    //      it used to be set in the .conf , or explicitly as in 
+    //          src/tests/unit-tests/signal-processing-blocks/acquisition/galileo_e1_pcps_ambiguous_acquisition_gsoc2013_test.cc#L194
+    //      @TODO: -> we'll need to add this param setup in to the '.conf' 
     if (d_trk_parameters.system == 'G')
         {
             d_systemName = "GPS";
@@ -240,6 +244,46 @@ dll_pll_veml_tracking::dll_pll_veml_tracking(const Dll_Pll_Conf &conf_)
                             d_interchange_iq = true;
                         }
                 }
+            else
+                {
+                    LOG(WARNING) << "Invalid Signal argument when instantiating tracking blocks";
+                    std::cerr << "Invalid Signal argument when instantiating tracking blocks\n";
+                    d_correlation_length_ms = 1;
+                    d_secondary = false;
+                    d_signal_carrier_freq = 0.0;
+                    d_code_period = 0.0;
+                    d_code_length_chips = 0;
+                    d_code_samples_per_chip = 0U;
+                    d_symbols_per_bit = 0;
+                }
+        }
+    // handle SBAS
+    else if (d_trk_parameters.system == 'W')
+        {
+            d_systemName = "SBAS";
+            if (d_signal_type == "S1")
+                {
+                    d_signal_carrier_freq = GPS_L1_FREQ_HZ;
+                    d_code_period = GPS_L1_CA_CODE_PERIOD_S;
+                    d_code_chip_rate = GPS_L1_CA_CODE_RATE_CPS;
+                    d_correlation_length_ms = 1;
+                    d_code_samples_per_chip = 1;
+                    d_code_length_chips = static_cast<int32_t>(GPS_L1_CA_CODE_LENGTH_CHIPS);
+                    // GPS L1 C/A does not have pilot component nor secondary code
+                    d_secondary = false;
+                    d_trk_parameters.track_pilot = false;
+                    d_trk_parameters.slope = 1.0;
+                    d_trk_parameters.spc = d_trk_parameters.early_late_space_chips;
+                    d_trk_parameters.y_intercept = 1.0;
+                    // symbol integration: 20 trk symbols (20 ms) = 1 tlm bit
+                    // set the bit transition pattern in secondary code to obtain bit synchronization
+                    d_secondary_code_length = static_cast<uint32_t>(GPS_CA_PREAMBLE_LENGTH_SYMBOLS);
+                    d_secondary_code_string = GPS_CA_PREAMBLE_SYMBOLS_STR;
+                    d_symbols_per_bit = GPS_CA_TELEMETRY_SYMBOLS_PER_BIT;
+                }
+            
+            // else if (d_signal_type == "L5")
+                
             else
                 {
                     LOG(WARNING) << "Invalid Signal argument when instantiating tracking blocks";
@@ -653,7 +697,8 @@ void dll_pll_veml_tracking::start_tracking()
     Signal_[1] = d_acquisition_gnss_synchro->Signal[1];
     Signal_[2] = d_acquisition_gnss_synchro->Signal[2];
 
-    if (d_systemName == "GPS" and d_signal_type == "1C")
+    if ((d_systemName == "GPS" and d_signal_type == "1C") ||
+            (d_systemName == "SBAS" and d_signal_type == "S1"))
         {
             gps_l1_ca_code_gen_float(d_tracking_code, d_acquisition_gnss_synchro->PRN, 0);
         }

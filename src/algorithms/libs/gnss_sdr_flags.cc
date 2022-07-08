@@ -42,6 +42,10 @@ DEFINE_int32(doppler_max, 0, "If defined, sets the maximum Doppler value in the 
 
 DEFINE_int32(doppler_step, 0, "If defined, sets the frequency step in the search grid, in Hz (overrides the configuration file).");
 
+DEFINE_string(system, "G", "If defined, set the channel system type ('G', 'W', 'E', ...)");
+DEFINE_string(signal, "1C", "If defined, sets the channel identifier ('1C', '1B', ...)");
+
+
 DEFINE_int32(cn0_samples, 20, "Number of correlator outputs used for CN0 estimation.");
 
 DEFINE_int32(cn0_min, 25, "Minimum valid CN0 (in dB-Hz).");
@@ -111,6 +115,27 @@ static bool ValidateSignalSource(const char* flagname, const std::string& value)
     return false;
 }
 
+static bool ValidateSignal(const char* flagname, const std::string& value)
+{
+    if (fs::exists(value) or value == "-")
+        {  // value is ok
+            return true;
+        }
+    std::cout << "Invalid value for flag -" << flagname << ". The file '" << value << "' does not exist.\n";
+    std::cout << "GNSS-SDR program ended.\n";
+    return false;
+}
+
+static bool ValidateSystem(const char* flagname, const std::string& value)
+{
+    if (fs::exists(value) or value == "-")
+        {  // value is ok
+            return true;
+        }
+    std::cout << "Invalid value for flag -" << flagname << ". The file '" << value << "' does not exist.\n";
+    std::cout << "GNSS-SDR program ended.\n";
+    return false;
+}
 static bool ValidateDopplerMax(const char* flagname, int32_t value)
 {
     const int32_t max_value = 1000000;
@@ -224,6 +249,8 @@ DEFINE_validator(c, &ValidateC);
 DEFINE_validator(config_file, &ValidateConfigFile);
 DEFINE_validator(s, &ValidateS);
 DEFINE_validator(signal_source, &ValidateSignalSource);
+// DEFINE_validator(system, &ValidateSystem);
+// DEFINE_validator(signal, &ValidateSignal);
 DEFINE_validator(doppler_max, &ValidateDopplerMax);
 DEFINE_validator(doppler_step, &ValidateDopplerStep);
 DEFINE_validator(cn0_samples, &ValidateCn0Samples);

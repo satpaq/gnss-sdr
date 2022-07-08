@@ -40,6 +40,10 @@ DECLARE_string(signal_source);     //!< Path to the file containing the signal s
 DECLARE_string(timestamp_source);  //!< Path to the file containing the signal samples.
 DECLARE_bool(rf_shutdown);         //!< Shutdown RF when program exits.
 
+// Declare the flags for the channel type
+DECLARE_string(system);           //!< If defined, set the channel system type ('G', 'W', 'E', ...)
+DECLARE_string(signal);           //!< If defined, sets the channel identifier ('1C', '1B', ...)
+
 // Declare flags for acquisition blocks
 DECLARE_int32(doppler_max);   //!< If defined, maximum Doppler value in the search grid, in Hz (overrides the configuration file).
 DECLARE_int32(doppler_step);  //!< If defined, sets the frequency step in the search grid, in Hz, in Hz (overrides the configuration file).
