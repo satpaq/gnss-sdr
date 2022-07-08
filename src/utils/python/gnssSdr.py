@@ -229,7 +229,7 @@ class GNSS_SDR():
         # code frequency (chip/s)
         code_freq_chips = trackDict['code_freq_chips'].T[0,sample_idx:]
         # code frequency rate (chips/s/s)
-        code_freq_rate_chips = trackDict['code_freq_rate_chips'].T[0,sample_idx:]
+        # code_freq_rate_chips = trackDict['code_freq_rate_chips'].T[0,sample_idx:]
         # accumulated carrier phase (rad)
         acc_carrier_phase = trackDict['acc_carrier_phase_rad'].T[0,sample_idx:]
         # carrier to noise ratio (dB-Hz)
@@ -435,15 +435,16 @@ fname_e = '/darren_0629_e'
 fname_f = '/darren_0629_f'
 fname_a = '/darren/mini_0706_30s_4m_short_g50_trialA'
 fname_b = '/darren/mini_0706_60s_4m_short_g50_trialB'
+fname_sbas1 = '/sbas/usrp_mini_60s_4m_f'
 fname_f2 = '/darren/usrp_mini_60s_4m_f'
-fname = fname_f2
+fname = fname_sbas1
 dar = GNSS_SDR(name='dar', log_path=l_path+fname)
 
 print("DARREN PLOTS")
-# dar_f.plot_acq()
-dar.plot_tracking(prn=23)
-dar.plot_tracking(prn=10)
-dar.plot_observables(do_plot)
+# dar.plot_acq()
+# dar.plot_tracking(prn=23)
+dar.plot_tracking()
+# dar.plot_observables(do_plot)
 # dar.plot_nav(do_plot)
 # dar.plot_pvt(do_plot)
 # %%

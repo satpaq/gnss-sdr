@@ -11,10 +11,12 @@
             "cwd": "${workspaceFolder}",
             "program": "${workspaceFolder}/build/src/main/gnss-sdr",
             "args": [
-                "-c", "work/gnss-sdr_GPS_L1_sbas.conf",
+                // "-c", "work/gnss-sdr_GPS_L1_sbas.conf",
+                "-c", "work/gnss-sdr_GPS_L1_sbas_multi.conf",
                 // "-c", "work/gnss-sdr_GPS_L1_darren.conf",
-                "--signal_source", "work/usrp_mini_60s_4m_f.dat",
-                "--log_dir", "data/darren/usrp_mini_60s_4m_f",
+                "--signal_source", "work/mini_0706_60s_4m_short_g50_trialB.dat",
+                "--log_dir", "data/sbas/mini_0706_60s_4m_short_g50_trialB",
+
             ],
             "stopAtEntry": false,
             "environment": [{
