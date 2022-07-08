@@ -2436,6 +2436,7 @@ void GNSSFlowgraph::set_signals_list()
     if (configuration_->property("Channels_S1.count", 0) > 0)
         {
             // Loop to create SBAS L1 C/A signals
+            std::string prnList;
             for (available_gnss_prn_iter = available_sbas_prn.cbegin();
                  available_gnss_prn_iter != available_sbas_prn.cend();
                  available_gnss_prn_iter++)
@@ -2443,7 +2444,9 @@ void GNSSFlowgraph::set_signals_list()
                     available_SBAS_1C_signals_.emplace_back(
                         Gnss_Satellite(std::string("SBAS"), *available_gnss_prn_iter),
                         std::string("S1"));
+                    prnList.append(" SV %d",*available_gnss_prn_iter);
                 }
+            LOG(INFO) << "set up SBAS channels as: " << prnList;
         }
 
     if (configuration_->property("Channels_1B.count", 0) > 0)
