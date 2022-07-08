@@ -20,6 +20,6 @@ cmake-build-debug/
 .vs/
 Testing/
 
-
+debug/
 build/
 build_volk/
