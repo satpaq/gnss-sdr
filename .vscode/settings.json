@@ -1,5 +1,10 @@
 {
-    "cmake.configureOnOpen": false,
+    "cmake.configureOnOpen": true,
+    "cmake.configureSettings": {
+        "Boost_NO_SYSTEM_PATHS":"True",
+        "BOOST_ROOT:PATHNAME": "/home/blmckinley/install",
+        "Boost_LIBRARY_DIRS:FILEPATH": "/home/blmckinley/install//lib",
+    },
     "python.defaultInterpreterPath": "~/.virtualenv/python-3LHSocPD/bin/python",
     "python.terminal.integrated.env.linux": {
         "DISPLAY" : "localhost:10.0",
