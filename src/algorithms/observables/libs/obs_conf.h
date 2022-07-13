@@ -32,6 +32,7 @@ class Obs_Conf
 public:
     Obs_Conf();
 
+    std::string dump_dir{};
     std::string dump_filename{"obs_dump.dat"};
     int32_t smoothing_factor{0};
     uint32_t nchannels_in{0U};

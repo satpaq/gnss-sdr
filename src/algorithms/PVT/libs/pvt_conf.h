@@ -33,6 +33,7 @@ public:
     std::map<int, int> rtcm_msg_rate_ms;
 
     std::string rinex_name = std::string("-");
+    std::string dump_dir;
     std::string dump_filename;
     std::string nmea_dump_filename;
     std::string nmea_dump_devname;

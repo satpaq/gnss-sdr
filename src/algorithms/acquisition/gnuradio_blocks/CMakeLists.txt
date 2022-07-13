@@ -73,6 +73,7 @@ target_link_libraries(acquisition_gr_blocks
 target_include_directories(acquisition_gr_blocks
     PRIVATE
         ${CMAKE_SOURCE_DIR}/src/core/receiver
+        ${CMAKE_SOURCE_DIR}/src/core/libs
 )
 
 if(GNURADIO_USES_STD_POINTERS)

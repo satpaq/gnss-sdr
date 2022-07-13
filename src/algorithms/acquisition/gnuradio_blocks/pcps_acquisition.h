@@ -250,6 +250,7 @@ private:
     arma::fmat d_narrow_grid;
 
     std::queue<Gnss_Synchro> d_monitor_queue;
+    std::string d_dump_dir;
     std::string d_dump_filename;
 
     int64_t d_dump_number;

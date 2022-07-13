@@ -187,6 +187,7 @@ private:
     std::chrono::time_point<std::chrono::system_clock> d_start;
     std::chrono::time_point<std::chrono::system_clock> d_end;
 
+    std::string d_dump_dir;
     std::string d_dump_filename;
     std::string d_xml_base_path;
     std::string d_local_time_str;

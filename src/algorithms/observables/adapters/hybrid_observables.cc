@@ -25,16 +25,19 @@
 HybridObservables::HybridObservables(const ConfigurationInterface* configuration,
     const std::string& role, unsigned int in_streams, unsigned int out_streams) : role_(role), in_streams_(in_streams), out_streams_(out_streams)
 {
+    
     const std::string default_dump_filename("./observables.dat");
     DLOG(INFO) << "role " << role;
     dump_ = configuration->property(role + ".dump", false);
     dump_mat_ = configuration->property(role + ".dump_mat", true);
+    dump_dir_ = configuration->property("GNSS-SDR.dump_dir", (std::string) "data/defaultDir");
     dump_filename_ = configuration->property(role + ".dump_filename", default_dump_filename);
 
     Obs_Conf conf{};
 
     conf.dump = dump_;
     conf.dump_mat = dump_mat_;
+    conf.dump_dir = dump_dir_;
     conf.dump_filename = dump_filename_;
     conf.nchannels_in = in_streams_;
     conf.nchannels_out = out_streams_;

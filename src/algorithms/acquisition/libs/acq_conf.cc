@@ -41,6 +41,7 @@ void Acq_Conf::SetFromConfiguration(const ConfigurationInterface *configuration,
     dump = configuration->property(role + ".dump", dump);
     dump_channel = configuration->property(role + ".dump_channel", dump_channel);
     blocking = configuration->property(role + ".blocking", blocking);
+    dump_dir = configuration->property("GNSS-SDR.dump_dir", (std::string) "data/defaultDir");
     dump_filename = configuration->property(role + ".dump_filename", dump_filename);
 
     use_automatic_resampler = configuration->property("GNSS-SDR.use_acquisition_resampler", use_automatic_resampler);

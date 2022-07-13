@@ -609,8 +609,13 @@ dll_pll_veml_tracking::dll_pll_veml_tracking(const Dll_Pll_Conf &conf_)
         {
             d_dump_filename = d_trk_parameters.dump_filename;
             d_dump_dir = d_trk_parameters.dump_dir;
-            
+
+            if (d_dump_filename.empty())
+                {
+                    d_dump_filename = "trk_channel_";                    
+                }            
             d_dump_filename = makeDumpFile(d_dump_dir, d_dump_filename);
+            d_dump_filename.append(".dat");
             std::string dump_path = d_dump_filename.substr(0, d_dump_filename.find_last_of('/'));
             d_dump = makeDumpDir(dump_path);
         }

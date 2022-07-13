@@ -39,6 +39,7 @@ public:
 
     /* PCPS Acquisition configuration */
     std::string item_type{"gr_complex"};
+    std::string dump_dir;
     std::string dump_filename;
 
     int64_t fs_in{4000000LL};

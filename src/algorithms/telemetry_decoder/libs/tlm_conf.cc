@@ -22,6 +22,7 @@ void Tlm_Conf::SetFromConfiguration(const ConfigurationInterface *configuration,
     const std::string &role)
 {
     const std::string default_dumpname("telemetry");
+    dump_dir = configuration->property("GNSS-SDR.dump_dir", (std::string) "data/defaultDir");
     dump_filename = configuration->property(role + ".dump_filename", default_dumpname);
     dump = configuration->property(role + ".dump", false);
     dump_mat = configuration->property(role + ".dump_mat", dump);

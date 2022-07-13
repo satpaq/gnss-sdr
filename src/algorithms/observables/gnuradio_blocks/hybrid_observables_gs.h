@@ -112,6 +112,7 @@ private:
     std::vector<double> d_channel_last_pseudorange_smooth;
     std::vector<double> d_channel_last_carrier_phase_rads;
 
+    std::string d_dump_dir;
     std::string d_dump_filename;
 
     std::ofstream d_dump_file;

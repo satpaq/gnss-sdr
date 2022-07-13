@@ -33,11 +33,6 @@ std::string makeDumpFile(std::string dir, std::string name){
         }
     else
         dump_path = dir;
-    
-    if (name.empty())
-        {
-           name = "trk_channel_";                    
-        }
     // remove extension if any
     if (name.substr(1).find_last_of('.') != std::string::npos)
         {

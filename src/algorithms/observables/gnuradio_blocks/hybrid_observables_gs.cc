@@ -50,6 +50,8 @@ namespace wht = std;
 #endif
 
 
+#include "dump_tools.h"
+
 hybrid_observables_gs_sptr hybrid_observables_gs_make(const Obs_Conf &conf_)
 {
     return hybrid_observables_gs_sptr(new hybrid_observables_gs(conf_));
@@ -61,6 +63,7 @@ hybrid_observables_gs::hybrid_observables_gs(const Obs_Conf &conf_)
           gr::io_signature::make(conf_.nchannels_in, conf_.nchannels_in, sizeof(Gnss_Synchro)),
           gr::io_signature::make(conf_.nchannels_out, conf_.nchannels_out, sizeof(Gnss_Synchro))),
       d_conf(conf_),
+      d_dump_dir(conf_.dump_dir),
       d_dump_filename(conf_.dump_filename),
       d_smooth_filter_M(static_cast<double>(conf_.smoothing_factor)),
       d_T_rx_step_s(static_cast<double>(conf_.observable_interval_ms) / 1000.0),
@@ -120,35 +123,15 @@ hybrid_observables_gs::hybrid_observables_gs(const Obs_Conf &conf_)
     // ############# ENABLE DATA FILE LOG #################
     if (d_dump)
         {
-            std::string dump_path;
-            // Get path
-            if (d_dump_filename.find_last_of('/') != std::string::npos)
-                {
-                    std::string dump_filename_ = d_dump_filename.substr(d_dump_filename.find_last_of('/') + 1);
-                    dump_path = d_dump_filename.substr(0, d_dump_filename.find_last_of('/'));
-                    d_dump_filename = dump_filename_;
-                }
-            else
-                {
-                    dump_path = std::string(".");
-                }
             if (d_dump_filename.empty())
                 {
                     d_dump_filename = "observables.dat";
                 }
-            // remove extension if any
-            if (d_dump_filename.substr(1).find_last_of('.') != std::string::npos)
-                {
-                    d_dump_filename = d_dump_filename.substr(0, d_dump_filename.find_last_of('.'));
-                }
+            d_dump_filename = makeDumpFile(d_dump_dir, d_dump_filename);
             d_dump_filename.append(".dat");
-            d_dump_filename = dump_path + fs::path::preferred_separator + d_dump_filename;
-            // create directory
-            if (!gnss_sdr_create_directory(dump_path))
-                {
-                    std::cerr << "GNSS-SDR cannot create dump file for the Observables block. Wrong permissions?\n";
-                    d_dump = false;
-                }
+            std::string dump_path = d_dump_filename.substr(0, d_dump_filename.find_last_of('/'));
+            d_dump = makeDumpDir(dump_path);
+            
             d_dump_file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
             try
                 {

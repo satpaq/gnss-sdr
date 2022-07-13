@@ -133,6 +133,9 @@ int save_tlm_matfile(const std::string &dumpfile)
 
 bool tlm_remove_file(const std::string &file_to_remove)
 {
+    // DR: @TODO: someday extend this to all classes to do their own cleanup.  
+    // all we would have to do is check for a config property (or make a global)
+    // that enables a cleaner-up to do what this does, but for acq, track, observ, pvt, etc.
     errorlib::error_code ec;
     return fs::remove(fs::path(file_to_remove), ec);
 }

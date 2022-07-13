@@ -102,6 +102,9 @@ namespace wht = boost;
 namespace wht = std;
 #endif
 
+#include "dump_tools.h"
+
+
 rtklib_pvt_gs_sptr rtklib_make_pvt_gs(uint32_t nchannels,
     const Pvt_Conf& conf_,
     const rtk_t& rtk)
@@ -118,6 +121,7 @@ rtklib_pvt_gs::rtklib_pvt_gs(uint32_t nchannels,
     : gr::sync_block("rtklib_pvt_gs",
           gr::io_signature::make(nchannels, nchannels, sizeof(Gnss_Synchro)),
           gr::io_signature::make(0, 0, 0)),
+      d_dump_dir(conf_.dump_dir),
       d_dump_filename(conf_.dump_filename),
       d_gps_ephemeris_sptr_type_hash_code(typeid(std::shared_ptr<Gps_Ephemeris>).hash_code()),
       d_gps_iono_sptr_type_hash_code(typeid(std::shared_ptr<Gps_Iono>).hash_code()),
@@ -211,35 +215,14 @@ rtklib_pvt_gs::rtklib_pvt_gs(uint32_t nchannels,
 
     if (d_dump)
         {
-            std::string dump_path;
-            // Get path
-            if (d_dump_filename.find_last_of('/') != std::string::npos)
-                {
-                    std::string dump_filename_ = d_dump_filename.substr(d_dump_filename.find_last_of('/') + 1);
-                    dump_path = d_dump_filename.substr(0, d_dump_filename.find_last_of('/'));
-                    d_dump_filename = dump_filename_;
-                }
-            else
-                {
-                    dump_path = std::string(".");
-                }
             if (d_dump_filename.empty())
                 {
                     d_dump_filename = "pvt";
                 }
-            // remove extension if any
-            if (d_dump_filename.substr(1).find_last_of('.') != std::string::npos)
-                {
-                    d_dump_filename = d_dump_filename.substr(0, d_dump_filename.find_last_of('.'));
-                }
-            dump_ls_pvt_filename = dump_path + fs::path::preferred_separator + d_dump_filename;
-            dump_ls_pvt_filename.append(".dat");
-            // create directory
-            if (!gnss_sdr_create_directory(dump_path))
-                {
-                    std::cerr << "GNSS-SDR cannot create dump file for the PVT block. Wrong permissions?\n";
-                    d_dump = false;
-                }
+            d_dump_filename = makeDumpFile(d_dump_dir, d_dump_filename);
+            d_dump_filename.append(".dat");
+            std::string dump_path = d_dump_filename.substr(0, d_dump_filename.find_last_of('/'));
+            d_dump = makeDumpDir(dump_path);
         }
 
     // initialize kml_printer

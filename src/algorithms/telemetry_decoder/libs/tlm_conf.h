@@ -34,6 +34,7 @@ public:
 
     void SetFromConfiguration(const ConfigurationInterface *configuration, const std::string &role);
 
+    std::string dump_dir;
     std::string dump_filename;
     std::string dump_crc_stats_filename;
     bool dump{false};

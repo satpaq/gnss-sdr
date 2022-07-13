@@ -79,6 +79,7 @@ public:
 
 private:
     hybrid_observables_gs_sptr observables_;
+    std::string dump_dir_;
     std::string dump_filename_;
     std::string role_;
     unsigned int in_streams_;

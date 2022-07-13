@@ -48,6 +48,7 @@ endif()
 target_include_directories(obs_gr_blocks
     PUBLIC
         ${CMAKE_SOURCE_DIR}/src/core/interfaces
+        ${CMAKE_SOURCE_DIR}/src/core/libs
 )
 
 if(GNURADIO_USES_STD_POINTERS)

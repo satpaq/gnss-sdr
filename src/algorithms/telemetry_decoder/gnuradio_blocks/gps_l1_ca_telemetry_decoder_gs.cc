@@ -36,6 +36,7 @@
 #include <iostream>         // for cout
 #include <memory>           // for shared_ptr
 #include <vector>
+#include "dump_tools.h"
 
 #ifdef COMPILER_HAS_ROTL
 #include <bit>
@@ -70,6 +71,7 @@ gps_l1_ca_telemetry_decoder_gs::gps_l1_ca_telemetry_decoder_gs(
     const Gnss_Satellite &satellite,
     const Tlm_Conf &conf) : gr::block("gps_navigation_gs", gr::io_signature::make(1, 1, sizeof(Gnss_Synchro)),
                                 gr::io_signature::make(1, 1, sizeof(Gnss_Synchro))),
+                            d_dump_dir(conf.dump_dir),
                             d_dump_filename(conf.dump_filename),
                             d_sample_counter(0ULL),
                             d_preamble_index(0ULL),
@@ -172,6 +174,7 @@ gps_l1_ca_telemetry_decoder_gs::~gps_l1_ca_telemetry_decoder_gs()
         }
     if (d_dump && (pos != 0) && d_dump_mat)
         {
+
             save_tlm_matfile(d_dump_filename);
             if (d_remove_dat)
                 {
@@ -232,6 +235,7 @@ void gps_l1_ca_telemetry_decoder_gs::set_channel(int32_t channel)
                 {
                     try
                         {
+                            d_dump_filename = makeDumpFile(d_dump_dir, d_dump_filename);
                             d_dump_filename.append(std::to_string(d_channel));
                             d_dump_filename.append(".dat");
                             d_dump_file.exceptions(std::ifstream::failbit | std::ifstream::badbit);

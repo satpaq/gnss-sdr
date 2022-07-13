@@ -83,6 +83,7 @@ private:
 
     std::array<int32_t, GPS_CA_PREAMBLE_LENGTH_BITS> d_preamble_samples{};
 
+    std::string d_dump_dir;
     std::string d_dump_filename;
     std::ofstream d_dump_file;
 

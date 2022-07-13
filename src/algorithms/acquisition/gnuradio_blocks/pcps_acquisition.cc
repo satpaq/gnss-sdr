@@ -38,7 +38,7 @@
 #include <cmath>  // for floor, fmod, rint, ceil
 #include <iostream>
 #include <map>
-
+#include "dump_tools.h"
 
 pcps_acquisition_sptr pcps_make_acquisition(const Acq_Conf& conf_)
 {
@@ -52,6 +52,7 @@ pcps_acquisition::pcps_acquisition(const Acq_Conf& conf_)
           gr::io_signature::make(0, 1, sizeof(Gnss_Synchro))),
       d_acq_parameters(conf_),
       d_gnss_synchro(nullptr),
+      d_dump_dir(conf_.dump_dir),
       d_dump_filename(conf_.dump_filename),
       d_dump_number(0LL),
       d_sample_counter(0ULL),
@@ -133,34 +134,14 @@ pcps_acquisition::pcps_acquisition(const Acq_Conf& conf_)
 
     if (d_dump)
         {
-            std::string dump_path;
-            // Get path
-            if (d_dump_filename.find_last_of('/') != std::string::npos)
-                {
-                    const std::string dump_filename_ = d_dump_filename.substr(d_dump_filename.find_last_of('/') + 1);
-                    dump_path = d_dump_filename.substr(0, d_dump_filename.find_last_of('/'));
-                    d_dump_filename = dump_filename_;
-                }
-            else
-                {
-                    dump_path = std::string(".");
-                }
             if (d_dump_filename.empty())
                 {
                     d_dump_filename = "acquisition";
                 }
-            // remove extension if any
-            if (d_dump_filename.substr(1).find_last_of('.') != std::string::npos)
-                {
-                    d_dump_filename = d_dump_filename.substr(0, d_dump_filename.find_last_of('.'));
-                }
-            d_dump_filename = dump_path + fs::path::preferred_separator + d_dump_filename;
-            // create directory
-            if (!gnss_sdr_create_directory(dump_path))
-                {
-                    std::cerr << "GNSS-SDR cannot create dump file for the Acquisition block. Wrong permissions?\n";
-                    d_dump = false;
-                }
+            d_dump_filename = makeDumpFile(d_dump_dir, d_dump_filename);
+            d_dump_filename.append(".dat");
+            std::string dump_path = d_dump_filename.substr(0, d_dump_filename.find_last_of('/'));
+            d_dump = makeDumpDir(dump_path);
         }
 }
 
