@@ -60,6 +60,7 @@
 #include <memory>
 #include <numeric>
 #include <vector>
+#include "dump_tools.h"
 
 #if HAS_GENERIC_LAMBDA
 #else
@@ -607,35 +608,11 @@ dll_pll_veml_tracking::dll_pll_veml_tracking(const Dll_Pll_Conf &conf_)
     if (d_dump)
         {
             d_dump_filename = d_trk_parameters.dump_filename;
-            std::string dump_path;
-            // Get path
-            if (d_dump_filename.find_last_of('/') != std::string::npos)
-                {
-                    std::string dump_filename_ = d_dump_filename.substr(d_dump_filename.find_last_of('/') + 1);
-                    dump_path = d_dump_filename.substr(0, d_dump_filename.find_last_of('/'));
-                    d_dump_filename = dump_filename_;
-                }
-            else
-                {
-                    dump_path = std::string(".");
-                }
-            if (d_dump_filename.empty())
-                {
-                    d_dump_filename = "trk_channel_";
-                }
-            // remove extension if any
-            if (d_dump_filename.substr(1).find_last_of('.') != std::string::npos)
-                {
-                    d_dump_filename = d_dump_filename.substr(0, d_dump_filename.find_last_of('.'));
-                }
-
-            d_dump_filename = dump_path + fs::path::preferred_separator + d_dump_filename;
-            // create directory
-            if (!gnss_sdr_create_directory(dump_path))
-                {
-                    std::cerr << "GNSS-SDR cannot create dump files for the tracking block. Wrong permissions?\n";
-                    d_dump = false;
-                }
+            d_dump_dir = d_trk_parameters.dump_dir;
+            
+            d_dump_filename = makeDumpFile(d_dump_dir, d_dump_filename);
+            std::string dump_path = d_dump_filename.substr(0, d_dump_filename.find_last_of('/'));
+            d_dump = makeDumpDir(dump_path);
         }
     d_last_timetag_samplecounter = 0;
     d_timetag_waiting = false;

@@ -97,6 +97,7 @@ endif()
 target_include_directories(tracking_gr_blocks
     PUBLIC
         ${CMAKE_SOURCE_DIR}/src/core/interfaces
+        ${CMAKE_SOURCE_DIR}/src/core/libs
 )
 
 if(ENABLE_CUDA)

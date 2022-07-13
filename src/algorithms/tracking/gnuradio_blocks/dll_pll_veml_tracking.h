@@ -162,7 +162,7 @@ private:
     std::string d_signal_type;
     std::string d_signal_pretty_name;
     std::string d_dump_filename;
-
+    std::string d_dump_dir;
     std::ofstream d_dump_file;
 
     // uint64_t d_sample_counter;

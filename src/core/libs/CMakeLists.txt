@@ -17,6 +17,7 @@ set(CORE_LIBS_SOURCES
     channel_status_msg_receiver.cc
     channel_event.cc
     command_event.cc
+    dump_tools.cc
     galileo_e6_has_msg_receiver.cc
     nav_message_monitor.cc
     nav_message_udp_sink.cc
@@ -32,6 +33,7 @@ set(CORE_LIBS_HEADERS
     channel_status_msg_receiver.h
     channel_event.h
     command_event.h
+    dump_tools.h
     nav_message_packet.h
     nav_message_udp_sink.h
     serdes_nav_message.h

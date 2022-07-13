@@ -35,7 +35,6 @@ Dll_Pll_Conf::Dll_Pll_Conf() : carrier_lock_th(FLAGS_carrier_lock_th),
     // system = 'G';  // OR 'S' for SBAS
 }
 
-// DR: eventually make the G vs S configurable from the .conf file
 void Dll_Pll_Conf::SetFromConfiguration(const ConfigurationInterface *configuration,
     const std::string &role)
 {
@@ -50,6 +49,7 @@ void Dll_Pll_Conf::SetFromConfiguration(const ConfigurationInterface *configurat
     fs_in = configuration->property("GNSS-SDR.internal_fs_sps", fs_in_deprecated);
     high_dyn = configuration->property(role + ".high_dyn", high_dyn);
     dump = configuration->property(role + ".dump", dump);
+    dump_dir = configuration->property("GNSS-SDR.dump_dir", (std::string) "data/defaultDir");
     dump_filename = configuration->property(role + ".dump_filename", dump_filename);
     dump_mat = configuration->property(role + ".dump_mat", dump_mat);
     pll_bw_hz = configuration->property(role + ".pll_bw_hz", pll_bw_hz);

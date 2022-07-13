@@ -37,6 +37,7 @@ public:
 
     /* DLL/PLL tracking configuration */
     std::string item_type{"gr_complex"};
+    std::string dump_dir{};
     std::string dump_filename{"./dll_pll_dump.dat"};
     double fs_in{2000000.0};
     double carrier_lock_th{0.0};
