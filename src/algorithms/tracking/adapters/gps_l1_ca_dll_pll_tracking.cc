@@ -62,10 +62,6 @@ GpsL1CaDllPllTracking::GpsL1CaDllPllTracking(
             std::cout << TEXT_RED << "WARNING: GPS L1 C/A. PLL or DLL narrow tracking bandwidth is higher than wide tracking one" << TEXT_RESET << '\n';
         }
 
-    // DR: this is where we set the ".system" param.  set as "W" for SBAS
-    trk_params.system = 'G';
-    const std::array<char, 3> sig_{'1', 'C', '\0'};
-    std::copy_n(sig_.data(), 3, trk_params.signal);
 
     // ################# Make a GNU Radio Tracking block object ################
     if (trk_params.item_type == "gr_complex")

@@ -23,21 +23,27 @@
 
 Dll_Pll_Conf::Dll_Pll_Conf() : carrier_lock_th(FLAGS_carrier_lock_th),
                                cn0_samples(FLAGS_cn0_samples),
-                            //    system(FLAGS_system),
-                            //    signal(FLAGS_signal),
                                cn0_min(FLAGS_cn0_min),
                                max_code_lock_fail(FLAGS_max_lock_fail),
                                max_carrier_lock_fail(FLAGS_max_carrier_lock_fail)
 {
-    signal[0] = '1';
-    signal[1] = 'C';
-    signal[2] = '\0';
-    // system = 'G';  // OR 'S' for SBAS
 }
 
 void Dll_Pll_Conf::SetFromConfiguration(const ConfigurationInterface *configuration,
     const std::string &role)
 {
+    std::string sig = role.substr(role.find("_") + 1);
+    signal[0] = sig.at(0);
+    signal[1] = sig.at(1);
+    signal[2] = '\0';
+    if (signal[0] == 'S')
+        {
+            system = 'S';
+        }
+    else
+        {
+            system = 'G';
+        }
     item_type = configuration->property(role + ".item_type", item_type);
     if (!item_type_valid(item_type))
         {

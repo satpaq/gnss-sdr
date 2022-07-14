@@ -512,7 +512,7 @@ std::string Gnss_Satellite::what_block(const std::string& system_, uint32_t PRN_
                     block_ = std::string("WAAS");  // WAAS Eutelsat 117 West B
                     break;
                 case 135:
-                    block_ = std::string("WAAS");  // WAAS Galaxy 15
+                    block_ = std::string("WAAS");  // WAAS Galaxy 30
                     break;
                 case 136:
                     block_ = std::string("EGNOS");  // EGNOS Operational Platform. SES-5 (a.k.a. Sirius 5 or Astra 4B)
