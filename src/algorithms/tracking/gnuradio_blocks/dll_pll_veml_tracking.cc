@@ -166,10 +166,6 @@ dll_pll_veml_tracking::dll_pll_veml_tracking(const Dll_Pll_Conf &conf_)
     map_signal_pretty_name["S1"] = "SBAS";
     d_signal_pretty_name = map_signal_pretty_name[d_signal_type];
     
-    //  DR: seems like ".system" is forced to 'G'.  it represents the Gnss_Synchro::System{} 
-    //      it used to be set in the .conf , or explicitly as in 
-    //          src/tests/unit-tests/signal-processing-blocks/acquisition/galileo_e1_pcps_ambiguous_acquisition_gsoc2013_test.cc#L194
-    //      @TODO: -> we'll need to add this param setup in to the '.conf' 
     if (d_trk_parameters.system == 'G')
         {
             d_systemName = "GPS";
@@ -259,7 +255,7 @@ dll_pll_veml_tracking::dll_pll_veml_tracking(const Dll_Pll_Conf &conf_)
                 }
         }
     // handle SBAS
-    else if (d_trk_parameters.system == 'W')
+    else if (d_trk_parameters.system == 'S')
         {
             d_systemName = "SBAS";
             if (d_signal_type == "S1")
@@ -615,7 +611,6 @@ dll_pll_veml_tracking::dll_pll_veml_tracking(const Dll_Pll_Conf &conf_)
                     d_dump_filename = "trk_channel_";                    
                 }            
             d_dump_filename = makeDumpFile(d_dump_dir, d_dump_filename);
-            d_dump_filename.append(".dat");
             std::string dump_path = d_dump_filename.substr(0, d_dump_filename.find_last_of('/'));
             d_dump = makeDumpDir(dump_path);
         }
@@ -1442,6 +1437,9 @@ void dll_pll_veml_tracking::log_data()
                     // accumulated carrier phase
                     tmp_float = static_cast<float>(d_acc_carrier_phase_rad);
                     d_dump_file.write(reinterpret_cast<char *>(&tmp_float), sizeof(float));
+                    // remainder code phase
+                    tmp_float = static_cast<float>(d_rem_code_phase_samples);
+                    d_dump_file.write(reinterpret_cast<char *>(&tmp_float), sizeof(float));
                     // carrier and code frequency
                     tmp_float = static_cast<float>(d_carrier_doppler_hz);
                     d_dump_file.write(reinterpret_cast<char *>(&tmp_float), sizeof(float));
@@ -1490,7 +1488,7 @@ int32_t dll_pll_veml_tracking::save_matfile() const
     // READ DUMP FILE
     std::ifstream::pos_type size;
     const int32_t number_of_double_vars = 1;
-    const int32_t number_of_float_vars = 19;
+    const int32_t number_of_float_vars = 20;
     const int32_t epoch_size_bytes = sizeof(uint64_t) + sizeof(double) * number_of_double_vars +
                                      sizeof(float) * number_of_float_vars + sizeof(uint32_t);
     std::ifstream dump_file;
@@ -1531,6 +1529,7 @@ int32_t dll_pll_veml_tracking::save_matfile() const
     auto Prompt_Q = std::vector<float>(num_epoch);
     auto PRN_start_sample_count = std::vector<uint64_t>(num_epoch);
     auto acc_carrier_phase_rad = std::vector<float>(num_epoch);
+    auto rem_code_phase_samples = std::vector<float>(num_epoch);
     auto carrier_doppler_hz = std::vector<float>(num_epoch);
     auto carrier_doppler_rate_hz = std::vector<float>(num_epoch);
     auto code_freq_chips = std::vector<float>(num_epoch);
@@ -1559,6 +1558,7 @@ int32_t dll_pll_veml_tracking::save_matfile() const
                             dump_file.read(reinterpret_cast<char *>(&Prompt_Q[i]), sizeof(float));
                             dump_file.read(reinterpret_cast<char *>(&PRN_start_sample_count[i]), sizeof(uint64_t));
                             dump_file.read(reinterpret_cast<char *>(&acc_carrier_phase_rad[i]), sizeof(float));
+                            dump_file.read(reinterpret_cast<char *>(&rem_code_phase_samples[i]), sizeof(float));
                             dump_file.read(reinterpret_cast<char *>(&carrier_doppler_hz[i]), sizeof(float));
                             dump_file.read(reinterpret_cast<char *>(&carrier_doppler_rate_hz[i]), sizeof(float));
                             dump_file.read(reinterpret_cast<char *>(&code_freq_chips[i]), sizeof(float));
@@ -1625,6 +1625,10 @@ int32_t dll_pll_veml_tracking::save_matfile() const
             Mat_VarFree(matvar);
 
             matvar = Mat_VarCreate("acc_carrier_phase_rad", MAT_C_SINGLE, MAT_T_SINGLE, 2, dims.data(), acc_carrier_phase_rad.data(), 0);
+            Mat_VarWrite(matfp, matvar, MAT_COMPRESSION_ZLIB);  // or MAT_COMPRESSION_NONE
+            Mat_VarFree(matvar);
+
+            matvar = Mat_VarCreate("rem_code_phase_sample", MAT_C_SINGLE, MAT_T_SINGLE, 2, dims.data(), rem_code_phase_samples.data(), 0);
             Mat_VarWrite(matfp, matvar, MAT_COMPRESSION_ZLIB);  // or MAT_COMPRESSION_NONE
             Mat_VarFree(matvar);
 

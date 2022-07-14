@@ -115,27 +115,6 @@ static bool ValidateSignalSource(const char* flagname, const std::string& value)
     return false;
 }
 
-static bool ValidateSignal(const char* flagname, const std::string& value)
-{
-    if (fs::exists(value) or value == "-")
-        {  // value is ok
-            return true;
-        }
-    std::cout << "Invalid value for flag -" << flagname << ". The file '" << value << "' does not exist.\n";
-    std::cout << "GNSS-SDR program ended.\n";
-    return false;
-}
-
-static bool ValidateSystem(const char* flagname, const std::string& value)
-{
-    if (fs::exists(value) or value == "-")
-        {  // value is ok
-            return true;
-        }
-    std::cout << "Invalid value for flag -" << flagname << ". The file '" << value << "' does not exist.\n";
-    std::cout << "GNSS-SDR program ended.\n";
-    return false;
-}
 static bool ValidateDopplerMax(const char* flagname, int32_t value)
 {
     const int32_t max_value = 1000000;

@@ -12,11 +12,16 @@
             "cwd": "${workspaceFolder}",
             "program": "${workspaceFolder}/build/src/main/gnss-sdr",
             "args": [
-                // "-c", "work/gnss-sdr_GPS_L1_sbas.conf",
-                "-c", "work/gnss-sdr_GPS_L1_sbas_multi.conf",
+                "-c", "work/gnss-sdr_GPS_L1_sbas.conf",
+                // "-c", "work/gnss-sdr_GPS_L1_spain.conf",
                 // "-c", "work/gnss-sdr_GPS_L1_darren.conf",
-                "--signal_source", "work/mini_0706_60s_4m_short_g50_trialB.dat",
-                "--log_dir", "data/sbas/mini_0706_60s_4m_short_g50_trialB",
+                "--signal_source", "work/geofix1_config17_30s_900mhz_take2.dat",
+                // "--signal_source", "work/mini_0706_30s_4m_short_g50_trialA.dat",
+                
+                // DON'T FORGET TO CHANGE THE DUMP_DIR in the .CONF!!!
+
+                "--log_dir", "data/sbas/geofix1_config17_30s_900mhz_take2"
+                // "--log_dir", "data/sbas/mini_0706_30s_4m_short_g50_trialA"
 
             ],
             "stopAtEntry": false,
@@ -49,19 +54,6 @@
             "justMyCode": true
         },
         {
-            "name": "tracking plot",
-            "type": "python",
-            "args": [
-                "-hr",
-                "8", // sim length 
-            ],
-            "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "program": "src/utils/python/plot_tracking.py",
-            "console": "integratedTerminal",
-            "redirectOutput": false,
-        },
-        {
             "name": "grab_data",
             "type": "python",
             "args": [
@@ -74,17 +66,16 @@
             "redirectOutput": false,
         },
         {
-            "name": "process gnss-sdr",
+            "name": "gnssSdr Debug",
             "type": "python",
             "args": [
-                "-c", "d",  // one of 'd','s','w' for picking which config to run
-                "-f", "mini_0706_30s_4m_short_g50_trialA.dat"
             ],
             "request": "launch",
-            "cwd": "${workspaceFolder}/work",
-            "program": "process_data.py",
+            "cwd": "${workspaceFolder}",
+            "program": "src/utils/python/gnssSdr.py",
             "console": "integratedTerminal",
             "redirectOutput": false,
         },
+        
     ]
 }
