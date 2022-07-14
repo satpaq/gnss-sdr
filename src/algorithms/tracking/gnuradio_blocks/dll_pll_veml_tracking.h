@@ -78,7 +78,6 @@ private:
     void do_correlation_step(const gr_complex *input_samples);
     void run_dll_pll();
     void check_carrier_phase_coherent_initialization();
-    void check_code_phase_coherent_initialization();
     void update_tracking_vars();
     void clear_tracking_vars();
     void save_correlation_results();
@@ -129,7 +128,6 @@ private:
     double d_code_freq_chips;
     double d_carrier_doppler_hz;
     double d_acc_carrier_phase_rad;
-    double d_acc_code_phase_samples;
     double d_rem_code_phase_chips;
     double d_T_chip_seconds;
     double d_T_prn_seconds;
@@ -202,9 +200,7 @@ private:
     bool d_secondary;
     bool d_dump;
     bool d_dump_mat;
-    bool d_remove_dat;
     bool d_acc_carrier_phase_initialized;
-    bool d_acc_code_phase_initialized;
     bool d_enable_extended_integration;
     bool d_Flag_PLL_180_deg_phase_locked;
 };

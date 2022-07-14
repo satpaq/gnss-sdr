@@ -5,7 +5,7 @@
         "BOOST_ROOT:PATHNAME": "/home/blmckinley/install",
         "Boost_LIBRARY_DIRS:FILEPATH": "/home/blmckinley/install//lib",
     },
-    // "python.defaultInterpreterPath": "~/.virtualenv/python-3LHSocPD/bin/python",
+    "python.defaultInterpreterPath": "~/.virtualenv/python-3LHSocPD/bin/python",
     "python.terminal.integrated.env.linux": {
         "DISPLAY" : "localhost:10.0",
     }

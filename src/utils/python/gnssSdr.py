@@ -232,8 +232,6 @@ class GNSS_SDR():
         # code_freq_rate_chips = trackDict['code_freq_rate_chips'].T[0,sample_idx:]
         # accumulated carrier phase (rad)
         acc_carrier_phase = trackDict['acc_carrier_phase_rad'].T[0,sample_idx:]
-        # accumulated code phase (samples)
-        acc_code_phase_sample = trackDict['acc_code_phase_sample']
         # carrier to noise ratio (dB-Hz)
         cn0_dB = trackDict['CN0_SNV_dB_Hz'].T[0,sample_idx:]
 
@@ -251,7 +249,7 @@ class GNSS_SDR():
             # ax3.set_ylabel('Doppler Freq [kHz]')
             # ax3.set_title('Doppler Shift on PRN %d' % prn)
             
-            fig2, ax = plt.subplot_mosaic([['tl','tr'], ['ml','mr'], ['bl','br']], constrained_layout=True)
+            fig2, ax = plt.subplot_mosaic([['tl','tr'], ['ml','mr'], ['b','b']], constrained_layout=True)
             
             ax['tl'].plot(data_I, data_Q, '.')
             ax['tl'].set_xlabel('I Data')
@@ -273,17 +271,12 @@ class GNSS_SDR():
             ax['mr'].set_ylabel('Amplitude')
             ax['mr'].set_title('Filtered DLL Discrim')
 
-            ax['bl'].plot(_time_s, acc_carrier_phase)
-            ax['bl'].set_title('Accum Carrier Phase')
-            ax['bl'].set_ylabel('Phase (rad)')
-            ax['bl'].set_xlabel('Time (s)')
+            ax['b'].plot(_time_s, acc_carrier_phase)
+            ax['b'].set_title('Accum Carrier Phase')
+            ax['b'].set_ylabel('Phase (rad)')
+            ax['b'].set_xlabel('Time (s)')
             
-            ax['br'].plot(_time_s, acc_code_phase_sample)
-            ax['br'].set_title('Accum Code Phase')
-            ax['br'].set_ylabel('Phase (sample)')
-            ax['br'].set_xlabel('Time (s)')
-            
-        return _time_s, carrier_dop, data_I, data_Q, dll, dll_raw, pll, pll_raw, acc_carrier_phase, acc_code_phase_sample
+        return _time_s, carrier_dop, data_I, data_Q, dll, dll_raw, pll, pll_raw
 
     def parseObserve(self,do_plot=False):
         # index 1 is number of the epoch
@@ -421,18 +414,18 @@ class GNSS_SDR():
 #                         default=312, help='the number of seconds between data')
 
 l_path = '/home/groundpaq/darren_space/gnss-sdr/data'
-dr_path = '/home/darren/src/gnss-sdr/data'
+
 
 
 do_plot = True
 ##  ----- actions -----
 # %%  SPAIN
-# print("SPAIN PLOTS")
-# sp_gnss = GNSS_SDR(name='spain', nTrack=1, log_path=l_path+'/spain_0707')
+print("SPAIN PLOTS")
+sp_gnss = GNSS_SDR(name='spain', nTrack=1, log_path=l_path+'/spain_0707')
 
 # sp_gnss.plot_acq()
-# sp_gnss.plot_tracking(prn=32)
-# sp_gnss.plot_observables(do_plot)
+sp_gnss.plot_tracking(prn=32)
+sp_gnss.plot_observables(do_plot)
 # sp_gnss.plot_nav(do_plot)   # not yet working, @TODO: need to dig into CPP to understand .dat output
 # sp_gnss.plot_pvt(do_plot)
 
@@ -442,11 +435,10 @@ fname_e = '/darren_0629_e'
 fname_f = '/darren_0629_f'
 fname_a = '/darren/mini_0706_30s_4m_short_g50_trialA'
 fname_b = '/darren/mini_0706_60s_4m_short_g50_trialB'
-fname_baseball = '/darren/geofix1_config17_30s_900mhz_take1'
-fname_sbas = '/sbas/geofix1_config17_30s_900mhz_take1'
+fname_sbas1 = '/sbas/usrp_mini_60s_4m_f'
 fname_f2 = '/darren/usrp_mini_60s_4m_f'
-fname = fname_sbas
-dar = GNSS_SDR(name='dar', log_path=dr_path+fname)
+fname = fname_sbas1
+dar = GNSS_SDR(name='dar', log_path=l_path+fname)
 
 print("DARREN PLOTS")
 # dar.plot_acq()
