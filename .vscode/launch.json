@@ -12,15 +12,17 @@
             "cwd": "${workspaceFolder}",
             "program": "${workspaceFolder}/build/src/main/gnss-sdr",
             "args": [
-                "-c", "work/gnss-sdr_GPS_L1_sbas.conf",
+                // "-c", "work/gnss-sdr_GPS_L1_sbas.conf",
+                "-c", "work/gnss-sdr_GPS_L1_sbas_multi.conf",
                 // "-c", "work/gnss-sdr_GPS_L1_spain.conf",
                 // "-c", "work/gnss-sdr_GPS_L1_darren.conf",
-                "--signal_source", "work/geofix1_config17_30s_900mhz_take2.dat",
+                // "--signal_source", "work/geofix1_config17_30s_900mhz_take3.dat",
+                "--signal_source", "work/mini_0718_4m_bruce_lna_t1.dat",
                 // "--signal_source", "work/mini_0706_30s_4m_short_g50_trialA.dat",
                 
                 // DON'T FORGET TO CHANGE THE DUMP_DIR in the .CONF!!!
 
-                "--log_dir", "data/sbas/geofix1_config17_30s_900mhz_take2"
+                "--log_dir", "data/sbas/multi/mini_0718_4m_bruce_lna_t1",
                 // "--log_dir", "data/sbas/mini_0706_30s_4m_short_g50_trialA"
 
             ],
@@ -57,7 +59,9 @@
             "name": "grab_data",
             "type": "python",
             "args": [
-                "-n", "test_file.dat",  // file to save away
+                "-n", "blah.dat",  // file to save away
+                "-s", "20"      // seconds to record
+
             ],
             "request": "launch",
             "cwd": "${workspaceFolder}/work",
