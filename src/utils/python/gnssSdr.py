@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import argparse
 import sys, os, shutil
+import glob
 
 
 
@@ -29,8 +30,192 @@ def load_dumpMat(fname: str) -> dict:
 
     return arrays
 
+class GnssTrack():
+    ''' class for grabbing track outputs of a .conf processing '''
+    def __init__(self, name,  data_path, nTrack=8, debug_level=0,):
+        ''' Constructor
+        @param name [str]: name of this collection
+        @param nTrack [int]: number of tracking channels to look at
+        @param log_path [str]: the dir where the data is kept
 
+        '''
+        self.nTrack = nTrack
+        self.data_path = data_path
+        self.name = name
+        self.debugLvl = debug_level
+        self.samplingFreq = 4e6 # Hz
 
+        self.handle_tracking()
+        
+    def handle_tracking(self,):
+        geoArray = []
+        gpsArray = []
+        # only tracking files are loaded
+        all_files = glob.glob(self.data_path + '/**/*.mat',recursive=True)
+        nTrack = 0
+        track_files = []
+        for file in all_files:
+            if 'tracking' in file:
+                nTrack += 1
+                track_files.append(file)  # if we want it
+                filename = os.path.join(self.data_path, file)  # get abs fname
+                trackDict = load_dumpMat(filename)
+                hgTrack = self.make_hgTrack(trackDict)
+                if file.startswith('1C'):
+                    gpsArray.append(hgTrack)
+                elif file.startswith('S1'):
+                    geoArray.append(hgTrack)
+            
+        # store away raw, if we want it
+        self.nTrack = nTrack   
+        self.track_files = track_files
+        # store away hgTrack dicts
+        self.gpsTracks = gpsArray  
+        self.geoTracks = geoArray
+        
+     
+    def make_hgTrack(self, trackDict):
+        ''' take in the raw GNSS-SDR dict, output a hgTrack dict'''
+        sample_idx = 0
+        code_freq_chips = trackDict['code_freq_chips']
+        if sample_idx > 0 and sample_idx<len(code_freq_chips):
+            sample_idx = len(code_freq_chips) - sample_idx
+        else:
+            sample_idx = 0
+
+        # time since track start (s)
+        time_s = trackDict['PRN_start_sample_count'].T[0,sample_idx:]/self.samplingFreq
+        # prn under test
+        prn = trackDict['PRN'].T[0,sample_idx:][0]
+        
+        # status of lock test
+        carrier_lock = trackDict['carrier_lock_test'].T[0,sample_idx:]
+        # doppler shift (Hz)
+        carrier_dop = trackDict['carrier_doppler_hz'].T[0,sample_idx:]/1000
+
+        # carrier error (filterred, raw) at output of PLL (Hz) 
+        carrier_pll_filt_err = trackDict['carr_error_filt_hz'].T[0,sample_idx:]
+        carrier_pll_err = trackDict['carr_error_hz'].T[0,sample_idx:]
+        pll = carrier_pll_filt_err
+        pll_raw = carrier_pll_err
+        # code error (filtered, raw) at output of DLL (chips)
+        code_error_filt_chips = trackDict['code_error_chips'].T[0,sample_idx:]
+        dll = code_error_filt_chips
+        code_error_chips = trackDict['code_error_filt_chips'].T[0,sample_idx:]
+        dll_raw = code_error_chips
+        # code frequency (chip/s)
+        code_freq_chips = trackDict['code_freq_chips'].T[0,sample_idx:]
+        # code frequency rate (chips/s/s)
+        # code_freq_rate_chips = trackDict['code_freq_rate_chips'].T[0,sample_idx:]
+        # accumulated carrier phase (rad)
+        acc_carrier_phase = trackDict['acc_carrier_phase_rad'].T[0,sample_idx:]
+        # accumulated code phase (samples)
+        rem_code_phase_sample = trackDict['rem_code_phase_sample']
+        # carrier to noise ratio (dB-Hz)
+        cn0_dB = trackDict['CN0_SNV_dB_Hz'].T[0,sample_idx:]
+
+        # I and Q of correlator
+        data_I = trackDict['Prompt_I'].T[0,sample_idx:]
+        data_Q = trackDict['Prompt_Q'].T[0,sample_idx:]
+
+        dicto = {
+            'prn' : prn,
+            'time_s' : time_s,
+            'carrier_lock' : carrier_lock,
+            'carrier_dop' : carrier_dop,
+            'data_I' : data_I,
+            'data_Q' : data_Q,
+            'pll' : pll,
+            'dll' : dll,
+            'rem_code_phase_sample' : rem_code_phase_sample,
+            'acc_carrier_phase' : acc_carrier_phase,
+        }        
+        return dicto
+       
+    # def parsePrnTrack(self, prn, do_plot=True):
+    #     '''parse out the tracking data for a specific PRN '''
+        
+    #     if self.trackArray is None:
+    #         self.printer("No tracks to search")
+    #     else:
+    #         for trackDict in self.trackArray:
+    #             # handle case of A) only 1 tracked PRN  B) multiple tracked PRNs
+    #             dictDim =  np.ndim(trackDict['PRN'])
+    #             if dictDim == 1:
+    #                 this_prn = trackDict['PRN'][0]
+    #             elif dictDim == 2:
+    #                 this_prn = trackDict['PRN'][0][0]
+                
+    #             if this_prn==prn: 
+    #                 self.parseTrack(trackDict,do_plot)
+    #                 break
+    #             else:
+    #                 continue 
+        
+    ## ---- PLOTTING -----
+    def plot_gpsTrack(self,idx):
+        GnssTrack.plot_hgTrack(self.gpsTracks[idx])
+    def plot_geoTrack(self,idx):
+        GnssTrack.plot_hgTrack(self.geoTracks[idx])       
+    def plot_allGps(self,):
+        for idx, gpsTrack in enumerate(self.gpsTracks):
+            print("plotting %d" % idx)
+            GnssTrack.plot_hgTrack(gpsTrack)
+    def plot_allGeo(self,): 
+        for idx, geoTrack in enumerate(self.geoTracks):
+            print("plotting %d" % idx)
+            GnssTrack.plot_hgTrack(geoTrack)       
+    
+    @staticmethod
+    def plot_hgTrack(hgTrack):
+        time_s = hgTrack['time_s']
+        prn = hgTrack['prn']
+        data_I = hgTrack['data_I']
+        data_Q = hgTrack['data_Q']
+        dll = hgTrack['dll']
+        pll = hgTrack['pll']
+        carrier_lock = hgTrack['carrier_lock']
+        rem_code_phase_sample = hgTrack['rem_code_phase_sample']
+        acc_carrier_phase =  hgTrack['acc_carrier_phase']
+        
+        print("Plot Tracking of PRN %d" % prn)
+            
+        fig2, ax = plt.subplot_mosaic([['tl','tr'], ['ml','mr'], ['bl','br']], constrained_layout=True)
+        ax['tl'].plot(data_I, data_Q, '.')
+        ax['tl'].set_xlabel('I Data')
+        ax['tl'].set_ylabel('Q Data')
+        ax['tl'].set_title("Constellation Diagram")
+        
+        ax['tr'].plot(time_s, carrier_lock,)
+        # ax['tr'].set_xlabel('Time (s)')
+        ax['tr'].set_ylabel('Carrier Lock')
+        ax['tr'].set_title("PRN %d Carrier Lock" % prn)
+                    
+        ax['ml'].plot(time_s, pll)
+        ax['ml'].set_xlabel('Time (s)')
+        ax['ml'].set_ylabel('Amplitude')
+        ax['ml'].set_title('Filtered PLL Discrim')
+    
+        ax['mr'].plot(time_s, dll)
+        ax['mr'].set_xlabel('Time (s)')
+        ax['mr'].set_ylabel('Amplitude')
+        ax['mr'].set_title('Filtered DLL Discrim')
+
+        ax['bl'].plot(time_s, acc_carrier_phase)
+        ax['bl'].set_title('Accum Carrier Phase')
+        ax['bl'].set_ylabel('Phase (rad)')
+        ax['bl'].set_xlabel('Time (s)')
+        
+        ax['br'].plot(time_s, rem_code_phase_sample)
+        ax['br'].set_title('Remaining Code Phase')
+        ax['br'].set_ylabel('Phase (sample)')
+        ax['br'].set_xlabel('Time (s)')
+    
+    ## ----------- UTILITIES ------------- ##
+    def printer(self, strg):
+        if self.debugLvl > 1:
+            print("GNSS_SDR:: %s" %strg)
+        
 class GNSS_SDR():
     ''' class for gathering data from running GNSS-SDR '''
 
@@ -436,15 +621,33 @@ do_plot = True
 # sp_gnss.plot_nav(do_plot)   # not yet working, @TODO: need to dig into CPP to understand .dat output
 # sp_gnss.plot_pvt(do_plot)
 
+# %% new tracker stuff
+dr_path = '/home/darren/src/gnss-sdr/data/'
+fname_sbas_bruce2 = 'sbas/multi/mini_0718_4m_bruce_lna_t2'
+fname = fname_sbas_bruce2
+track_trial = GnssTrack('trialB',data_path=dr_path +  fname)
+
+
+# %% output plots
+track_trial.plot_allGeo()   # somehow the output doesnn't happen
+plt.show()
+# print("gnssSdr.py end\n")
+
 # %%  DARREN
 # select which darren run to analyze
 fname_a = '/darren/mini_0706_30s_4m_short_g50_trialA'
 fname_b = '/darren/mini_0706_60s_4m_short_g50_trialB'
-fname_sbas = '/sbas/geofix1_config17_30s_900mhz_take1'
-fname_sbas2 = '/sbas/geofix1_config17_30s_900mhz_take2'
+fname_sbas_17_1 = '/sbas/geofix1_config17_30s_900mhz_take1'
+fname_sbas_17_2 = '/sbas/geofix1_config17_30s_900mhz_take2'
+fname_sbas_17_3 = '/sbas/geofix1_config17_30s_900mhz_take3'
+fname_sbas_18_1 = '/sbas/geofix1_config18_30s_900mhz_take1'
+fname_sbas_18_2 = '/sbas/geofix1_config18_30s_900mhz_take2'
+fname_sbas_bruce = '/sbas/mini_0718_4m_bruce_lna_t1'   # has a problem... re process
+fname_sbas_bruce2 = '/sbas/mini_0718_4m_bruce_lna_t2'
 fname_f2 = '/darren/usrp_mini_60s_4m_f'
-fname = fname_sbas2
+fname = fname_sbas_bruce2
 dar = GNSS_SDR(name='dar', log_path=dr_path+fname)
+
 
 print("DARREN PLOTS")
 # dar.plot_acq()
