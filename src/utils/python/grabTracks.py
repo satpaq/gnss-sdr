@@ -51,7 +51,7 @@ def load_dumpMat(fname: str) -> dict:
 
 class GnssTrack():
     ''' class for grabbing track outputs of a .conf processing '''
-    def __init__(self, name,  data_path, nTrack=8, debug_level=0,):
+    def __init__(self, data_path, nTrack=8, debug_level=0, name=None):
         ''' Constructor
         @param name [str]: name of this collection
         @param nTrack [int]: number of tracking channels to look at
@@ -59,8 +59,16 @@ class GnssTrack():
 
         '''
         self.nTrack = nTrack
+        if data_path.endswith('.dat'):
+            data_path = data_path.split('.')[0]
         self.data_path = data_path
+        
+        if name is None:
+            name = os.path.basename(data_path)
+        elif name.endswith(".dat"):
+            name = name.split('.')[0]
         self.name = name
+        
         self.debugLvl = debug_level
         self.samplingFreq = 4e6 # Hz
 
@@ -83,7 +91,7 @@ class GnssTrack():
                 try:
                     hgTrack = self.make_hgTrack(trackDict)
                 except:
-                    print("bad track exception, %s" % base) 
+                    self.printer("bad track exception, %s" % base, 1) 
                     # that track didn't succeed, move on dear friend
                     continue
                 if base.startswith('1C'):
@@ -185,7 +193,7 @@ class GnssTrack():
     #                 continue 
         
     ## ---- PLOTTING -----
-    def plot_gpsTrack(self,idx):
+    def plot_gpsTrack(self,idx: int):
         GnssTrack.plot_hgTrack(self.gpsTracks[idx])
     def plot_geoTrack(self,idx):
         GnssTrack.plot_hgTrack(self.geoTracks[idx])       
@@ -199,7 +207,7 @@ class GnssTrack():
             GnssTrack.plot_hgTrack(geoTrack)       
     
     @staticmethod
-    def plot_hgTrack(hgTrack):
+    def plot_hgTrack(hgTrack: dict):
         time_s = hgTrack['time_s']
         prn = hgTrack['prn']
         data_I = hgTrack['data_I']
@@ -244,32 +252,44 @@ class GnssTrack():
         ax['br'].set_xlabel('Time (s)')
     
     ## ----------- UTILITIES ------------- ##
-    def printer(self, strg):
-        if self.debugLvl > 1:
-            print("GNSSTrack:: %s" %strg)
+    def printer(self, strg: str , force: bool):
+        if self.debugLvl > 1 or force:
+            print("GNSSTrack::%s :: %s" % (self.name, strg))
      
 
-# %% new tracker stuff
-dr_path = '/home/darren/src/gnss-sdr/data/'
-fname_sbas = 'sbas/mini_0718_4m_bruce_lna_t2'  # old way
-fname_multi = 'sbas/multi/mini_0718_4m_bruce_lna_t2'
-fname = fname_multi
-track_trial = GnssTrack('trialB',data_path= dr_path + fname)
+# %% example of new tracker stuff
+# dr_path = '/home/darren/src/gnss-sdr/data/'
+# fname_sbas = 'sbas/mini_0718_4m_bruce_lna_t2'  # old way
+# fname_multi = 'sbas/multi/mini_0718_4m_bruce_lna_t2'
+# fname = fname_multi
+# track_trial = GnssTrack('trialB',data_path= dr_path + fname)
+# track_trial.plot_allGeo()   
+# track_trial.plot_allGps()
 
+# %%  new GEO + GPS stuff  7/26
 dr_path = '/home/darren/src/gnss-sdr/data/sbas/multi/'
 
 t1 = 'sky_0816_20s.dat'
-t2 = 'sky_0818_60s.dat'
+t2 = 'sky_0818_60s'
 t3 = 'sky_0821_60s.dat'
-t4 = 'sky_0823_60s.dat'
-t5 = 'sky_0832_60s.dat'
+t4 = 'sky_0823_60s'
+t5 = 'sky_0832_60s'
+files = [t1, t2, t3, t4, t5]
+files_short = [t3, t4,]
 
+tracks = []
+for a_file in files_short:
+    
+    dPath = dr_path + a_file
+    a_track = GnssTrack(data_path=dPath)
+    tracks.append(a_track)
+    
+# %% do work on the tracks
 
+for a_track in tracks:
+    # a_track.plot_allGeo()
+    a_track.plot_allGps()
 
-
-# %% output plots
-track_trial.plot_allGeo()   
-track_trial.plot_allGps()
 plt.show()
 print("grabTracks.py end\n")
 

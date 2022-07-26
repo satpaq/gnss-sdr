@@ -19,13 +19,13 @@
                 // "-c", "work/gnss-sdr_GPS_L1_spain.conf",
                 // "-c", "work/gnss-sdr_GPS_L1_darren.conf",
                 // "--signal_source", "work/geofix1_config17_30s_900mhz_take3.dat",
-                "--signal_source", "work/mini_0718_4m_bruce_lna_t2.dat",
+                "--signal_source", "work/sky_0821_60s.dat",
                 // "--signal_source", "work/mini_0706_30s_4m_short_g50_trialA.dat",
                 
                 // DON'T FORGET TO CHANGE THE DUMP_DIR in the .CONF!!!
                 // DON'T FORGET TO mkdir -p data/sbas/multi/DUMP_DIR 
 
-                "--log_dir", "data/sbas/multi/mini_0718_4m_bruce_lna_t2",
+                "--log_dir", "data/sbas/multi/sky_0821_60s",
                 // "--log_dir", "data/sbas/mini_0706_30s_4m_short_g50_trialA"
 
             ],
@@ -61,7 +61,7 @@
             ],
             "request": "launch",
             "cwd": "${workspaceFolder}/work",
-            "program": "grab_data.py",
+            "program": "grab_usrp_data.py",
             "console": "integratedTerminal",
             "redirectOutput": false,
         },
