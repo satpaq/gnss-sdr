@@ -90,6 +90,8 @@ class GnssTrack():
                     gpsArray.append(hgTrack)
                 elif base.startswith('S1'):
                     geoArray.append(hgTrack)
+                elif base.startswith('1B'):  
+                    pass  # someday come back and include Galileo in the gpsArray() 
             
         # store away raw, if we want it
         self.nTrack = nTrack   
@@ -254,8 +256,21 @@ fname_multi = 'sbas/multi/mini_0718_4m_bruce_lna_t2'
 fname = fname_multi
 track_trial = GnssTrack('trialB',data_path= dr_path + fname)
 
+dr_path = '/home/darren/src/gnss-sdr/data/sbas/multi/'
+
+t1 = 'sky_0816_20s.dat'
+t2 = 'sky_0818_60s.dat'
+t3 = 'sky_0821_60s.dat'
+t4 = 'sky_0823_60s.dat'
+t5 = 'sky_0832_60s.dat'
+
+
+
 
 # %% output plots
 track_trial.plot_allGeo()   
+track_trial.plot_allGps()
 plt.show()
 print("grabTracks.py end\n")
+
+# %%

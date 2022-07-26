@@ -6,6 +6,8 @@
     "configurations": [
         
         {
+            // config to breakpoint debug the custom build of gnss-sdr
+            // use this to go into the CPP code and look around
             "name": "(gdb) gnss-sdr",
             "type": "cppdbg",
             "request": "launch",
@@ -17,12 +19,13 @@
                 // "-c", "work/gnss-sdr_GPS_L1_spain.conf",
                 // "-c", "work/gnss-sdr_GPS_L1_darren.conf",
                 // "--signal_source", "work/geofix1_config17_30s_900mhz_take3.dat",
-                "--signal_source", "work/mini_0718_4m_bruce_lna_t1.dat",
+                "--signal_source", "work/mini_0718_4m_bruce_lna_t2.dat",
                 // "--signal_source", "work/mini_0706_30s_4m_short_g50_trialA.dat",
                 
                 // DON'T FORGET TO CHANGE THE DUMP_DIR in the .CONF!!!
+                // DON'T FORGET TO mkdir -p data/sbas/multi/DUMP_DIR 
 
-                "--log_dir", "data/sbas/multi/mini_0718_4m_bruce_lna_t1",
+                "--log_dir", "data/sbas/multi/mini_0718_4m_bruce_lna_t2",
                 // "--log_dir", "data/sbas/mini_0706_30s_4m_short_g50_trialA"
 
             ],
@@ -48,19 +51,12 @@
             ]
         },
         {
-            "name": "Python: Current File",
-            "type": "python",
-            "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal",
-            "justMyCode": true
-        },
-        {
-            "name": "grab_data",
+            // config to use the b200 on moffet3 to grab data for given time and to passed name
+            "name": "b210 grab_data",
             "type": "python",
             "args": [
-                "-n", "blah.dat",  // file to save away
-                "-s", "20"      // seconds to record
+                // "-n", "sky_0830_60s.dat",  // file to save away
+                "-s", "60"      // seconds to record
 
             ],
             "request": "launch",
@@ -70,16 +66,40 @@
             "redirectOutput": false,
         },
         {
-            "name": "gnssSdr Debug",
+            // this config calls the python wrapper around the gnss-sdr app
+            // use this when you're processing gnss-sdr (not debugging) 
+            "name": "do gnss-sdr",
+            "type": "python",
+            "args": [
+                "-f", "sky_0823_60s.dat",
+                "-c", "m",
+            ],
+            "request": "launch",
+            "cwd": "${workspaceFolder}/work",
+            "program": "process_data.py",
+            "console": "integratedTerminal",
+            "redirectOutput": false,
+        },
+        {
+            // this config calls they local python interpreter on grabTracks.py
+            // use this when you want to debug something in grabTracks class
+            "name": "python debug grabTracks",
             "type": "python",
             "args": [
             ],
             "request": "launch",
             "cwd": "${workspaceFolder}",
-            "program": "src/utils/python/gnssSdr.py",
+            "program": "src/utils/python/grabTracks.py",
             "console": "integratedTerminal",
             "redirectOutput": false,
         },
-        
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
     ]
 }
