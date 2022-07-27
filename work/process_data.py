@@ -48,6 +48,9 @@ class RunGnssSdr():
         result.check_returncode()
         print("success gnss-sdr computation")
 
+        print("note right now, when this fails, you need to cd into /work, then do \n")
+        print("rm 1C_*")
+        print("rm S1_*")
     
     
     def set_conf_type(self,conf_typ):
