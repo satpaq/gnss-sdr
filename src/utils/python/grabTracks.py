@@ -191,12 +191,33 @@ class GnssTrack():
     #                 break
     #             else:
     #                 continue 
-        
+    
+    def getGpsIdByPrn(self, prn: int):
+        prn_list = [d['prn'] for d in self.gpsTracks] 
+        return prn_list.index(prn)
+    def getGeoIdByPrn(self, prn: int):
+        prn_list = [d['prn'] for d in self.geoTracks] 
+        return prn_list.index(prn)
+                   
+     
     ## ---- PLOTTING -----
     def plot_gpsTrack(self,idx: int):
         GnssTrack.plot_hgTrack(self.gpsTracks[idx])
+    def plot_gpsTrackPrn(self, prn: int):
+        try:
+            i = self.getGpsIdByPrn(prn)
+            GnssTrack.plot_hgTrack(self.gpsTracks[i])
+        except ValueError:
+            self.printer('track of prn not found')
     def plot_geoTrack(self,idx):
         GnssTrack.plot_hgTrack(self.geoTracks[idx])       
+    def plot_geoTrackPrn(self, prn: int):
+        try:
+            i = self.getGeoIdByPrn(prn)
+            GnssTrack.plot_hgTrack(self.geoTracks[i])
+        except ValueError:
+            self.printer('track of prn not found', 1)
+        
     def plot_allGps(self,):
         for idx, gpsTrack in enumerate(self.gpsTracks):
             print("plotting %d" % idx)
@@ -288,7 +309,9 @@ for a_file in files_short:
 
 for a_track in tracks:
     # a_track.plot_allGeo()
-    a_track.plot_allGps()
+    # a_track.plot_allGps()
+    a_track.plot_gpsTrackPrn(24)
+    a_track.plot_geoTrackPrn(135)
 
 plt.show()
 print("grabTracks.py end\n")
