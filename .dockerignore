@@ -7,3 +7,6 @@ README.md
 LICENSE
 LICENSES/**
 .github/**
+
+# ignore files in data directory
+data/*
