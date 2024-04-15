@@ -45,6 +45,7 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive && apt-get install -
   nano=6.2-1 \
   protobuf-compiler=3.12.4-1ubuntu7.22.04.1 \
   python3-mako=1.1.3+ds1-2 \
+  gdb \
   && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ENV APPDATA /root
@@ -64,3 +65,9 @@ WORKDIR /home
 RUN /usr/bin/volk_profile -v 8111
 RUN /usr/local/bin/volk_gnsssdr_profile
 CMD ["bash"]
+
+RUN apt install -y update
+RUN apt install -y python3-pip
+RUN pip3 install pipenv
+RUN cd /workspaces/gnss-sdr/src/utils/python
+RUN pipenv install && pipenv shell

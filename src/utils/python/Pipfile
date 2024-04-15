@@ -1,14 +1,18 @@
 [[source]]
 url = "https://pypi.python.org/simple"
 verify_ssl = true
-name = "pypi"
+name = "gnss-sdr"
 
 [packages]
 h5py = "*"
 pandas = "*"
 scipy = "*"
+pip = "*"
+ipykernel = "*"
+matplotlib = "*"
+skyfield = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.8"
+python_version = "3.10"
