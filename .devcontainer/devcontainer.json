@@ -16,6 +16,14 @@
 	"forwardPorts": [
 		1234
 	],
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-vscode.cpptools-extension-pack",
+				"mhutchie.git-graph"
+			]
+		}
+	},
 
 	// Uncomment the next line to run commands after the container is created.
 	// "postCreateCommand": "cat /etc/os-release",
