@@ -407,58 +407,36 @@ class GNSS_SDR():
         
     
 
-# if __name__ == "__main__":
+if __name__ == "__main__":
     
-#     print("gnssSdr.py startup\n")
+    print("gnssSdr.py startup\n")
 
-#     ## -- PARSER ----
-#     parser = argparse.ArgumentParser(description=''' 
-#     This script is a class for doing gnss-sdr work ''')
-    
-#     # setup params
-#     parser.add_argument('-dt','--timestep', action='store', nargs=1, type=int,
-#                         default=312, help='the number of seconds between data')
-
-l_path = '/home/groundpaq/darren_space/gnss-sdr/data'
-dr_path = '/home/darren/src/gnss-sdr/data'
+    dr_path = os.path.abspath('.') + '/data'
+    do_plot = True
 
 
-do_plot = True
-##  ----- actions -----
-# SPAIN
-# print("SPAIN PLOTS")
-# sp_gnss = GNSS_SDR(name='spain', nTrack=1, log_path=l_path+'/spain_0707')
-
-# sp_gnss.plot_acq()
-# sp_gnss.plot_tracking(prn=32)
-# sp_gnss.plot_observables(do_plot)
-# sp_gnss.plot_nav(do_plot)   # not yet working, @TODO: need to dig into CPP to understand .dat output
-# sp_gnss.plot_pvt(do_plot)
-
-# %%  DARREN
-# select which darren run to analyze
-fname_a = '/darren/mini_0706_30s_4m_short_g50_trialA'
-fname_b = '/darren/mini_0706_60s_4m_short_g50_trialB'
-fname_sbas_17_1 = '/sbas/geofix1_config17_30s_900mhz_take1'
-fname_sbas_17_2 = '/sbas/geofix1_config17_30s_900mhz_take2'
-fname_sbas_17_3 = '/sbas/geofix1_config17_30s_900mhz_take3'
-fname_sbas_18_1 = '/sbas/geofix1_config18_30s_900mhz_take1'
-fname_sbas_18_2 = '/sbas/geofix1_config18_30s_900mhz_take2'
-fname_sbas_bruce = '/sbas/mini_0718_4m_bruce_lna_t1'   # has a problem... re process
-fname_sbas_bruce2 = '/sbas/mini_0718_4m_bruce_lna_t2'
-fname_f2 = '/darren/usrp_mini_60s_4m_f'
-fname = fname_sbas_bruce2
-dar = GNSS_SDR(name='dar', log_path=dr_path+fname)
+    # select which gnss-sdr output dir to grab mat's to analyze
+    fname_a = '/darren/mini_0706_30s_4m_short_g50_trialA'
+    fname_b = '/darren/mini_0706_60s_4m_short_g50_trialB'
+    fname_sbas_17_1 = '/sbas/geofix1_config17_30s_900mhz_take1'
+    fname_sbas_17_2 = '/sbas/geofix1_config17_30s_900mhz_take2'
+    fname_sbas_17_3 = '/sbas/geofix1_config17_30s_900mhz_take3'
+    fname_sbas_18_1 = '/sbas/geofix1_config18_30s_900mhz_take1'
+    fname_sbas_18_2 = '/sbas/geofix1_config18_30s_900mhz_take2'
+    fname_sbas_bruce = '/sbas/mini_0718_4m_bruce_lna_t1'   # has a problem... re process
+    fname_sbas_bruce2 = '/sbas/mini_0718_4m_bruce_lna_t2'
+    fname = fname_sbas_bruce2
+    dar = GNSS_SDR(name='dar', log_path=dr_path+fname)
 
 
-print("DARREN PLOTS")
-# dar.plot_acq()
-# dar.plot_tracking(prn=23)
-dar.plot_tracking()
-# dar.plot_observables(do_plot)
-# dar.plot_nav(do_plot)
-# dar.plot_pvt(do_plot)
-# %%
-plt.show()
-print("gnssSdr.py end\n")
+    print("DARREN PLOTS")
+    # dar.plot_acq()
+    # dar.plot_tracking(prn=23)
+    dar.plot_tracking()
+    # dar.plot_observables(do_plot)
+    # dar.plot_nav(do_plot)
+    # dar.plot_pvt(do_plot)
+    # %%
+    plt.show()
+    print("gnssSdr.py end\n")
 

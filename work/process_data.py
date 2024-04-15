@@ -15,7 +15,7 @@ class RunGnssSdr():
         self.do_log = do_log
         
         if conf_typ=='s':
-            self.in_fpath = '/home/groundpaq/darren_space/gnss-sdr/work/2013_04_04_GNSS_SIGNAL_at_CTTC_SPAIN/2013_04_04_GNSS_SIGNAL_at_CTTC_SPAIN.dat'
+            self.in_fpath = '2013_04_04_GNSS_SIGNAL_at_CTTC_SPAIN/2013_04_04_GNSS_SIGNAL_at_CTTC_SPAIN.dat'
         else:
             if dat_path.endswith('.dat'):
                 self.in_fpath = dat_path
@@ -48,9 +48,9 @@ class RunGnssSdr():
         result.check_returncode()
         print("success gnss-sdr computation")
 
-        print("note right now, when this fails, you need to cd into /work, then do \n")
-        print("rm 1C_*")
-        print("rm S1_*")
+        # print("note right now, when this fails, you need to cd into /work, then do \n")
+        # print("rm 1C_*")
+        # print("rm S1_*")
     
     
     def set_conf_type(self,conf_typ):
@@ -71,7 +71,7 @@ class RunGnssSdr():
                 
     def set_output_dir(self,):
         ''' set up the path str for outputs '''
-        rel_dir = "/data/sbas/" + self.dir_prefix + '/' + self.in_fpath.split(".")[0] + '/'
+        rel_dir = "/data/sbas/" + self.dir_prefix + '/'
         self.out_dir = self.homeDir + rel_dir
         
         if (not os.path.isdir(self.out_dir)):

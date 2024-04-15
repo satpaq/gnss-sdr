@@ -15,17 +15,20 @@
             "program": "${workspaceFolder}/build/src/main/gnss-sdr",
             "args": [
                 // "-c", "work/gnss-sdr_GPS_L1_sbas.conf",
-                "-c", "work/gnss-sdr_GPS_L1_sbas_multi.conf",
+                // "-c", "work/gnss-sdr_GPS_L1_sbas_multi.conf",
                 // "-c", "work/gnss-sdr_GPS_L1_spain.conf",
-                // "-c", "work/gnss-sdr_GPS_L1_darren.conf",
+                "-c",
+                "work/gnss-sdr_GPS_L1_darren.conf",
                 // "--signal_source", "work/geofix1_config17_30s_900mhz_take3.dat",
-                "--signal_source", "work/sky_0821_60s.dat",
+                "--signal_source",
+                "work/sky_0832_60s.dat",
                 // "--signal_source", "work/mini_0706_30s_4m_short_g50_trialA.dat",
                 
                 // DON'T FORGET TO CHANGE THE DUMP_DIR in the .CONF!!!
                 // DON'T FORGET TO mkdir -p data/sbas/multi/DUMP_DIR 
 
-                "--log_dir", "data/sbas/multi/sky_0821_60s",
+                "--log_dir",
+                "data/darren/sky_0832_60s",
                 // "--log_dir", "data/sbas/mini_0706_30s_4m_short_g50_trialA"
 
             ],
@@ -53,7 +56,7 @@
         {
             // config to use the b200 on moffet3 to grab data for given time and to passed name
             "name": "b210 grab_data",
-            "type": "python",
+            "type": "debugpy",
             "args": [
                 // "-n", "sky_0830_60s.dat",  // file to save away
                 "-s", "60"      // seconds to record
@@ -69,10 +72,11 @@
             // this config calls the python wrapper around the gnss-sdr app
             // use this when you're processing gnss-sdr (not debugging) 
             "name": "do gnss-sdr",
-            "type": "python",
+            "type": "debugpy",
             "args": [
-                "-f", "sky_0823_60s.dat",
-                "-c", "m",
+                // "-f", "sky_0823_60s.dat",
+                "-c",
+                "s",
             ],
             "request": "launch",
             "cwd": "${workspaceFolder}/work",
@@ -84,7 +88,7 @@
             // this config calls they local python interpreter on grabTracks.py
             // use this when you want to debug something in grabTracks class
             "name": "python debug grabTracks",
-            "type": "python",
+            "type": "debugpy",
             "args": [
             ],
             "request": "launch",
