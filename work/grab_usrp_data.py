@@ -1,4 +1,4 @@
-''' python file to grab the uhd data for gnss-sdr
+''' python file to call the uhd tools to collect raw data from USRP
 darren reis
 07/06/22
 '''
@@ -7,7 +7,7 @@ import argparse
 import subprocess
 import sys, os, shutil
 
-class GrabGnssSdr():
+class GrabUsrp():
         
     def __init__(self, fname=None, freq=1575.42, fs=4, dur=60, gain=50, typ='short', chan='B'):
         ''' Constructor '''
@@ -36,7 +36,7 @@ class GrabGnssSdr():
 
 if __name__ == "__main__":
     
-    print("grab_data.py startup\n")
+    print(f"{__file__} startup\n")
 
     ## -- PARSER ----
     parser = argparse.ArgumentParser(description=''' 
@@ -63,14 +63,14 @@ if __name__ == "__main__":
     args = parser.parse_args(sys.argv[1:])
     
     if args.name is None:
-        print("grab_data requires a save name for file output")
+        print(f"{__file__} requires a save name for file output")
         exit
     else:
         if not args.name.endswith('.dat'):
-            print("grab_data requires the save name with extension .dat")
+            print(f"{__file__} requires the save name with extension .dat")
             exit
             
-    GrabGnssSdr(fname=args.name, freq=args.freq, gain=args.gain, dur=args.sec, chan=args.chan, typ=args.type)
+    GrabUsrp(fname=args.name, freq=args.freq, gain=args.gain, dur=args.sec, chan=args.chan, typ=args.type)
     
     
-    print("grab_data.py finish\n")
+    print(f"{__file__} finish\n")

@@ -30,7 +30,7 @@ def load_dumpMat(fname: str) -> dict:
 
     return arrays
        
-class GNSS_SDR():
+class MonitorTools():
     ''' class for gathering data from running GNSS-SDR '''
 
     def __init__(self, name,  log_path, nTrack=8, debug_level=0,):
@@ -409,7 +409,7 @@ class GNSS_SDR():
 
 if __name__ == "__main__":
     
-    print("gnssSdr.py startup\n")
+    print(f"{__file__} startup\n")
 
     dr_path = os.path.abspath('.') + '/data'
     do_plot = True
@@ -426,7 +426,7 @@ if __name__ == "__main__":
     fname_sbas_bruce = '/sbas/mini_0718_4m_bruce_lna_t1'   # has a problem... re process
     fname_sbas_bruce2 = '/sbas/mini_0718_4m_bruce_lna_t2'
     fname = fname_sbas_bruce2
-    dar = GNSS_SDR(name='dar', log_path=dr_path+fname)
+    dar = MonitorTools(name='dar', log_path=dr_path+fname)
 
 
     print("DARREN PLOTS")
@@ -438,5 +438,5 @@ if __name__ == "__main__":
     # dar.plot_pvt(do_plot)
     # %%
     plt.show()
-    print("gnssSdr.py end\n")
+    print(f"{__file__} end\n")
 

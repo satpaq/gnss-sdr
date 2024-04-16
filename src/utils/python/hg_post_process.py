@@ -36,18 +36,6 @@ import argparse
 import sys, os
 import glob
 
-def load_dumpMat(fname: str) -> dict:
-    ''' 
-    @param: fname [str]: the name of the file to parse through (ends in .mat)
-    @return [dict]: dict of the data in the dumped file
-    '''    
-    arrays = {}
-    f = h5py.File(fname)
-    for k, v in f.items():
-        arrays[k] = np.array(v)
-
-    return arrays
-
 
 class GnssTrack():
     ''' class for grabbing track outputs of a .conf processing '''

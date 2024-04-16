@@ -111,7 +111,7 @@ class RunGnssSdr():
 
 if __name__ == "__main__":
     
-    print("--- process_data.py startup\n")
+    print(f"{__file__} startup\n")
 
     ## -- PARSER ----
     parser = argparse.ArgumentParser(description=''' 
@@ -129,14 +129,14 @@ if __name__ == "__main__":
     
     
     if args.datFile is None:
-        print("process_data requires a .dat file input\n")
+        print(f"{__file__} requires a .dat file input\n")
         
     
     if args.config is None:
-        print("process_data requires one of ['s', 'd', 'w'] to pick a .conf file\n")
+        print(f"{__file__} requires one of ['s', 'd', 'w'] to pick a .conf file\n")
         exit
     
         
     RunGnssSdr(conf_typ=args.config, dat_path=args.datFile, do_log=True)
     
-    print("---- process_data.py finish\n")
+    print(f"{__file__} finish\n")
