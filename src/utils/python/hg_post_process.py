@@ -261,7 +261,7 @@ class GnssTrack():
         ax['br'].set_xlabel('Time (s)')
     
     ## ----------- UTILITIES ------------- ##
-    def printer(self, strg: str , force: bool):
+    def printer(self, strg: str , force: bool = False):
         if self.debugLvl > 1 or force:
             print("GNSSTrack::%s :: %s" % (self.name, strg))
      

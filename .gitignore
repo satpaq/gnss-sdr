@@ -24,3 +24,5 @@ debug/
 build/
 build_volk/
 build2/
+
+*.pyc
