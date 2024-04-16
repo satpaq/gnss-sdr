@@ -55,3 +55,7 @@ RUN /usr/local/bin/volk_gnsssdr_profile
 WORKDIR /opt/gnss-sdr
 ENV PYTHONPATH "/usr/local/lib/python3/dist-packages:${PYTHONPATH}"
 ENV UHD_IMAGES_DIR "/usr/local/share/uhd/images"
+
+# https://stackoverflow.com/questions/46503947/how-to-get-pipenv-running-in-docker
+RUN pip install pipenv \
+  && pipenv install --system --deploy --ignore-pipfile
