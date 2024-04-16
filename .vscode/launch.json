@@ -21,14 +21,14 @@
                 "work/gnss-sdr_GPS_L1_darren.conf",
                 // "--signal_source", "work/geofix1_config17_30s_900mhz_take3.dat",
                 "--signal_source",
-                "work/sky_0832_60s.dat",
+                "work/mini_0718_4m_bruce_lna_t2.dat",
                 // "--signal_source", "work/mini_0706_30s_4m_short_g50_trialA.dat",
                 
                 // DON'T FORGET TO CHANGE THE DUMP_DIR in the .CONF!!!
                 // DON'T FORGET TO mkdir -p data/sbas/multi/DUMP_DIR 
 
                 "--log_dir",
-                "data/darren/sky_0832_60s",
+                "data/darren/mini_0718_4m_bruce_lna_t2.dat",
                 // "--log_dir", "data/sbas/mini_0706_30s_4m_short_g50_trialA"
 
             ],
@@ -71,7 +71,7 @@
         {
             // this config calls the python wrapper around the gnss-sdr app
             // use this when you're processing gnss-sdr (not debugging) 
-            "name": "do gnss-sdr",
+            "name": "python run gnss-sdr",
             "type": "debugpy",
             "args": [
                 // "-f", "sky_0823_60s.dat",
@@ -80,26 +80,35 @@
             ],
             "request": "launch",
             "cwd": "${workspaceFolder}/work",
-            "program": "process_data.py",
+            "program": "run_gnss_sdr.py",
             "console": "integratedTerminal",
             "redirectOutput": false,
         },
         {
-            // this config calls they local python interpreter on grabTracks.py
-            // use this when you want to debug something in grabTracks class
-            "name": "python debug grabTracks",
+            // use this when you want to debug something in post_process class
+            "name": "python hg_post_process",
+            "type": "debugpy",
+            "args": [],
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "program": "src/utils/python/hg_post_process.py",
+            "console": "integratedTerminal",
+            "redirectOutput": false,
+        },
+        {
+            "name": "python monitor tools",
             "type": "debugpy",
             "args": [
             ],
             "request": "launch",
             "cwd": "${workspaceFolder}",
-            "program": "src/utils/python/grabTracks.py",
+            "program": "src/utils/python/monitor_tools.py",
             "console": "integratedTerminal",
             "redirectOutput": false,
         },
         {
             "name": "Python: Current File",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
