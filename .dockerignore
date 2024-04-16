@@ -9,4 +9,4 @@ LICENSES/**
 .github/**
 
 # ignore files in data directory
-data/*
+data/**

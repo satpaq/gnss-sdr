@@ -1,6 +1,7 @@
 FROM higherground2/satellite_monitor_base:2.0.0
 
 # inherited the base UHD and GR already from above
+LABEL version="1.0" description="HG GNSS-SDR image" maintainer="darren@higherground.earth"
 
 RUN parallel_builds="$(expr $(nproc --all) / 2 + 1)"
 
@@ -39,7 +40,18 @@ RUN apt-get update && \
       gdb \
       && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-ENV PYTHONPATH /usr/lib/python3/dist-packages
-
 WORKDIR /opt/gnss-sdr
 COPY . /opt/gnss-sdr/
+
+RUN rm -rf /opt/gnss-sdr/build
+RUN mkdir /opt/gnss-sdr/build \
+  && cd /opt/gnss-sdr/build \
+  && cmake .. \
+  && make -j $parallel_builds \
+  && make install 
+
+RUN /usr/local/bin/volk_gnsssdr_profile
+
+WORKDIR /opt/gnss-sdr
+ENV PYTHONPATH "/usr/local/lib/python3/dist-packages:${PYTHONPATH}"
+ENV UHD_IMAGES_DIR "/usr/local/share/uhd/images"
