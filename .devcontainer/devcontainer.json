@@ -30,6 +30,9 @@
 			]
 		}
 	},
+	"forwardPorts": [
+		1234 // gnss-sdr monitor port 
+	]
 
 	// Uncomment the next line to run commands after the container is created.
 	// "postCreateCommand": "cat /etc/os-release",
