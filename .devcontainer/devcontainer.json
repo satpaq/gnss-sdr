@@ -1,7 +1,7 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/docker-existing-dockerfile
 {
-	"name": "hg gnss-sdr Dockerfile",
+	"name": "hg gnss-sdr ${localEnv:HOSTNAME}",
 	"build": {
 		// Sets the run context to one level up instead of the .devcontainer folder.
 		"context": "..",
@@ -16,7 +16,7 @@
 	"runArgs": [
 		"--privileged",
 		"--volume=/var/log/gpaq:/var/log/gpaq", // logger directory
-		"--name=gnss-sdr",
+		"--name=gnss-sdr_${localEnv:HOSTNAME}",
 		"--network=host",
 		"--memory=0b",
 		"--volume=/dev/bus/usb:/dev/bus/usb", // allow usb non-root acess
