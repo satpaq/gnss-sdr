@@ -40,10 +40,10 @@
 	},
 	"forwardPorts": [
 		1234 // gnss-sdr monitor port 
-	]
+	],
 
 	// Uncomment the next line to run commands after the container is created.
-	// "postCreateCommand": "cat /etc/os-release",
+	"postCreateCommand": "pip3 install --user -r src/utils/python/requirements.txt"
 
 	// Configure tool-specific properties.
 	// "customizations": {},

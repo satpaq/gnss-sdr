@@ -1,0 +1,8 @@
+h5py
+pandas
+scipy
+pip
+ipykernel
+matplotlib
+skyfield
+pytest
