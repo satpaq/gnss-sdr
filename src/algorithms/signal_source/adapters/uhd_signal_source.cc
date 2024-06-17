@@ -38,7 +38,8 @@ UhdSignalSource::UhdSignalSource(const ConfigurationInterface* configuration,
 {
     // DUMP PARAMETERS
     const std::string empty;
-    const std::string default_dump_file("./data/signal_source.dat");
+    std::string dump_dir = configuration->property("GNSS-SDR.dump_dir", (std::string) "data/defaultDir");
+    const std::string default_dump_file(dump_dir + "signal_source.dat");
     const std::string default_item_type("cshort");
 
     // UHD COMMON PARAMETERS
@@ -71,7 +72,7 @@ UhdSignalSource::UhdSignalSource(const ConfigurationInterface* configuration,
             samples_.push_back(configuration->property(role + ".samples", 0));
             bool dump_source = configuration->property(role + ".dump", false);
             dump_.push_back(dump_source);
-            std::string dump_source_filename = configuration->property(role + ".dump_filename", default_dump_file);
+            std::string dump_source_filename = configuration->property(role + dump_dir + ".dump_filename", default_dump_file);
             dump_filename_.push_back(dump_source_filename);
             if (dump_source)
                 {

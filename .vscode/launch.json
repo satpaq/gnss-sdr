@@ -18,11 +18,11 @@
                 // "-c", "work/gnss-sdr_GPS_L1_sbas_multi.conf",
                 "-c",
                 // "work/gnss-sdr_GPS_L1_darren.conf",
-                "work/gnss-sdr_GPS_L1_spain.conf",
+                "work/gnss-sdr_GPS_L1_usrp.conf",
                 // "--signal_source", "work/geofix1_config17_30s_900mhz_take3.dat",
-                "--signal_source",
+                // "--signal_source",
                 // "work/mini_0718_4m_bruce_lna_t2.dat",
-                "work/2013_04_04_GNSS_SIGNAL_at_CTTC_SPAIN/2013_04_04_GNSS_SIGNAL_at_CTTC_SPAIN.dat",
+                // "work/2013_04_04_GNSS_SIGNAL_at_CTTC_SPAIN/2013_04_04_GNSS_SIGNAL_at_CTTC_SPAIN.dat",
                 // "--signal_source", "work/mini_0706_30s_4m_short_g50_trialA.dat",
                 
                 // DON'T FORGET TO CHANGE THE DUMP_DIR in the .CONF!!!
@@ -30,7 +30,7 @@
 
                 "--log_dir",
                 // "data/darren/mini_0718_4m_bruce_lna_t2.dat",
-                "data/spain"
+                "data/darren/geofixFwd"
                 // "--log_dir", "data/sbas/mini_0706_30s_4m_short_g50_trialA"
 
             ],
