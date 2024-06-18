@@ -15,13 +15,13 @@ class GrabUsrp():
             print("typ given %s, must be one of ['short', 'complex']" % typ)
             exit()
 
-        script = "/usr/lib/uhd/examples/rx_samples_to_file"
-        args = " --args \"type=b200\" --duration %d --freq %d --rate %d --ref external"  \
+        script = "/usr/local/lib/uhd/examples/rx_samples_to_file"
+        self.args = " --args \"type=b200\" --duration %d --freq %d --rate %d --ref external"  \
             " --type %s --gain %d " % (dur, freq*1e6, fs*1e6, typ, gain)
-        args += "--file %s" % fname
+        self.args += "--file %s" % fname
         self.pick_ch(chan)
         
-        result = subprocess.run(["bash", "-c", script + args], text=True)
+        result = subprocess.run(["bash", "-c", script + self.args], text=True)
         result.check_returncode()
         print("success load")
 
