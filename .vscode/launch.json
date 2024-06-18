@@ -56,21 +56,6 @@
             ]
         },
         {
-            // config to use the b200 on moffet3 to grab data for given time and to passed name
-            "name": "b210 grab_data",
-            "type": "debugpy",
-            "args": [
-                // "-n", "sky_0830_60s.dat",  // file to save away
-                "-s", "60"      // seconds to record
-
-            ],
-            "request": "launch",
-            "cwd": "${workspaceFolder}/work",
-            "program": "grab_usrp_data.py",
-            "console": "integratedTerminal",
-            "redirectOutput": false,
-        },
-        {
             // this config calls the python wrapper around the gnss-sdr app
             // use this when you're processing gnss-sdr (not debugging) 
             "name": "python run gnss-sdr",
@@ -100,6 +85,7 @@
             "redirectOutput": false,
         },
         {
+            // use this to anazlye [acq, track, pvt, obs] dump mats out of a gnss-sdr 
             "name": "python monitor tools",
             "type": "debugpy",
             "args": [
@@ -107,6 +93,37 @@
             "request": "launch",
             "cwd": "${workspaceFolder}",
             "program": "src/utils/python/monitor_tools.py",
+            "console": "integratedTerminal",
+            "redirectOutput": false,
+        },
+        {
+            // use to make b200 grab data for given time and to passed name
+            "name": "b210 grab_data",
+            "type": "debugpy",
+            "args": [
+                "-n", "work/geofixfwd_l1ca_4M_short.dat",  // file to save away
+                "-s", "10",      // seconds to record
+                "-f", "3800",   // rx freq
+                "-fs", "4e6",   // sampling freq
+                "-t", "short"
+            ],
+            "request": "launch",
+            "cwd": "${workspaceFolder}/work",
+            "program": "grab_usrp_data.py",
+            "console": "integratedTerminal",
+            "redirectOutput": false,
+        },
+        {
+            // use to make b200 grab data for given time and to passed name
+            "name": "quick pyplot raw",
+            "type": "debugpy",
+            "args": [
+                "-n", "work/geofixfwd_l1ca_4M_short.dat",  // file to save away
+                "-fs", "4e6",   // sampling freq
+            ],
+            "request": "launch",
+            "cwd": "${workspaceFolder}/src/utils/python/plot_usrp",
+            "program": "grab_usrp_data.py",
             "console": "integratedTerminal",
             "redirectOutput": false,
         },
