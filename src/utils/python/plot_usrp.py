@@ -39,14 +39,18 @@ class PlotUsrp():
             self.dtype = np.float32
         elif typ=='s':
             self.dtype = np.int16
-        else:
-            self.dtype = np.int16
+        elif typ=="c":
+            self.dtype = np.complex64
     ## ----- LOADERS ------
     def handle_usrp(self,):
         # see fields in https://gnss-sdr.org/docs/sp-blocks/observables/#binary-output
         self.complex = np.fromfile(open(self.log_path),dtype=self.dtype)
-        self.I = self.complex[0::2]
-        self.Q = self.complex[1::2]
+        if self.dtype==np.complex64:
+            self.I = np.real(self.complex)
+            self.Q = np.imag(self.complex)
+        elif self.dtype==np.float32 or np.int16:
+            self.I = self.complex[0::2]
+            self.Q = self.complex[1::2]
         self.nSample = len(self.Q)
         self.dt = 1/self.samplingFreq
         if self.nSample*self.dt != float(self.nSec):
@@ -54,7 +58,6 @@ class PlotUsrp():
             exit()
         
         self.time_s = np.arange(self.nSample)/self.samplingFreq
-        # print("done parseing")
 
     ## --- LOW LEVEL PLOTTING -----
     def plot_time(self):
@@ -70,7 +73,10 @@ class PlotUsrp():
         fig2, ax = plt.subplots()
         sig_fft = np.fft.fftshift(np.fft.fft(self.complex))
         sig_dB = 20*np.log10(np.abs(sig_fft))
-        freqs = np.fft.fftshift(np.fft.fftfreq(2*self.nSample, d=self.dt))
+        if self.dtype==np.complex64:
+            freqs = np.fft.fftshift(np.fft.fftfreq(self.nSample, d=self.dt))
+        else:
+            freqs = np.fft.fftshift(np.fft.fftfreq(2*self.nSample, d=self.dt))
         
         ax.plot(freqs,sig_dB)
         ax.set_xlabel("Frequency (Hz)")
@@ -95,12 +101,15 @@ if __name__ == "__main__":
     This script is a class for quickview of usrp recorded data ''')
     
     # setup params
-    parser.add_argument('-n','--name', action='store', nargs=1, type=str,
+    parser.add_argument('-n','--name', action='store', type=str,
                         default='usrp_samples.dat', help='the filename to analyze')
-    parser.add_argument('-fs','--sampFreq', action='store', nargs=1, type=int,
-                        default=3e6, help='the sampling freq of the collection')
-    parser.add_argument('-nSec','--duration', action='store', nargs=1, type=float,
+    parser.add_argument('-fs','--sampFreq', action='store', type=int,
+                        default=3e6, help='the sampling freq of the collection (MHz)')
+    parser.add_argument('-nSec','--duration', action='store', type=float,
                         default=5, help='the duration of the collection (s)')
+    parser.add_argument('-t','--type', action='store', type=str,
+                        default='f', choices=['i', 'f', 'c'], 
+                        help='the datatype.  interleaved are \'i\' and \'f\'; complex as \'c\'')
     
     # get arguments
     args = parser.parse_args(sys.argv[1:])
@@ -113,11 +122,11 @@ if __name__ == "__main__":
             print(f"{__file__} requires the save name with extension .dat")
             exit
     
-    trial = PlotUsrp(l_path=args.name, nSec=args.duration, Fs=args.sampFreq, typ='i')
+    trial = PlotUsrp(l_path=args.name, nSec=args.duration, Fs=args.sampFreq*1e6, typ=args.type)
 
 
     # actions
-    trial.plot_fft()
+    trial.plot_usrp()
 
 
     plt.show()

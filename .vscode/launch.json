@@ -101,15 +101,15 @@
             "name": "b210 grab_data",
             "type": "debugpy",
             "args": [
-                "-n", "work/geofixfwd_l1ca_4M_short.dat",  // file to save away
-                "-s", "10",      // seconds to record
+                "-n", "work/geofixfwd_l1ca_4M_short_g60.dat",  // file to save away
+                "-s", "5",      // seconds to record
                 "-f", "3800",   // rx freq
                 "-fs", "4e6",   // sampling freq
                 "-t", "short"
             ],
             "request": "launch",
-            "cwd": "${workspaceFolder}/work",
-            "program": "grab_usrp_data.py",
+            "cwd": "${workspaceFolder}",
+            "program": "work/grab_usrp_data.py",
             "console": "integratedTerminal",
             "redirectOutput": false,
         },
@@ -118,12 +118,15 @@
             "name": "quick pyplot raw",
             "type": "debugpy",
             "args": [
-                "-n", "work/geofixfwd_l1ca_4M_short.dat",  // file to save away
-                "-fs", "4e6",   // sampling freq
+                // "-n", "work/geofixfwd_l1ca_4M_short_g60.dat",  // file to save away
+                "-n", "src/tests/signal_samples/GPS_L1_CA_ID_1_Fs_4Msps_2ms.dat",
+                "-fs", "4",   // sampling freq (MHz)
+                "-nSec", "0.002",
+                "-t","c",
             ],
             "request": "launch",
-            "cwd": "${workspaceFolder}/src/utils/python/plot_usrp",
-            "program": "grab_usrp_data.py",
+            "cwd": "${workspaceFolder}",
+            "program": "src/utils/python/plot_usrp.py",
             "console": "integratedTerminal",
             "redirectOutput": false,
         },
