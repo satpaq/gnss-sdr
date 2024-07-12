@@ -78,7 +78,13 @@ class MonitorTools():
             if(file.startswith('tracking_') and file.endswith('.mat')):
                 filename = os.path.join(self.log_path, file)
                 trackDict = load_dumpMat(filename)
-                trackArray.append(trackDict)
+                # handle case of no data 
+                if np.array_equal(trackDict["PRN"],[1, 0]):
+                    continue
+                else:
+                    trackArray.append(trackDict)
+        # the track array is a dict of gnss-sdr channels that created tracking data feeds.
+        # we discard the channels that never grabbed data (above) 
         self.trackArray = trackArray
         if self.nTrack == None:
             # save away the found tracks
@@ -425,14 +431,16 @@ if __name__ == "__main__":
     fname_sbas_18_2 = '/sbas/geofix1_config18_30s_900mhz_take2'
     fname_sbas_bruce = '/sbas/mini_0718_4m_bruce_lna_t1'   # has a problem... re process
     fname_sbas_bruce2 = '/sbas/mini_0718_4m_bruce_lna_t2'
-    fname = fname_sbas_bruce2
+    fname_usrp = '/darren/geofixFwd'
+    fname_spain = '/spain'
+    fname = fname_usrp
     dar = MonitorTools(name='dar', log_path=dr_path+fname)
 
 
     print("DARREN PLOTS")
-    # dar.plot_acq()
+    dar.plot_acq()
     # dar.plot_tracking(prn=23)
-    dar.plot_tracking()
+    dar.plot_tracking(prn=1)
     # dar.plot_observables(do_plot)
     # dar.plot_nav(do_plot)
     # dar.plot_pvt(do_plot)
